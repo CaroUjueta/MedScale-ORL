@@ -135,9 +135,8 @@ class ScaleScreen(Screen):
         state = {"score": values[0], "selected": 0}
         card._option_state = state
 
-        bg_rects = []
-        chk_data = []
-        lbl_refs = []
+        chk_widgets = []
+        lbl_widgets = []
 
         def _draw_cb(widget, is_selected):
             from kivy.graphics import Line
@@ -164,6 +163,16 @@ class ScaleScreen(Screen):
                         width=dp(1.5),
                     )
 
+        def _select(idx):
+            state["score"] = values[idx]
+            state["selected"] = idx
+            for j in range(len(chk_widgets)):
+                is_sel = (j == idx)
+                _draw_cb(chk_widgets[j], is_sel)
+                lbl_widgets[j].color = C_ACCENT if is_sel else C_TEXT
+                lbl_widgets[j].bold = is_sel
+
+        row_widgets = []
         for i, (opt_text, val) in enumerate(zip(options, values)):
             row = BoxLayout(
                 size_hint_y=None,
@@ -172,63 +181,43 @@ class ScaleScreen(Screen):
                 padding=[dp(4), 0],
             )
 
-            with row.canvas.before:
-                from kivy.graphics import Color as GColor, Rectangle
-                _bg_c = GColor(*C_ACCENT) if i == 0 else GColor(*get_color_from_hex("#F8F8F8"))
-                _bg_r = Rectangle(pos=row.pos, size=row.size)
-            bg_rects.append((_bg_c, _bg_r))
-            row.bind(pos=lambda s, p, ref=bg_rects[-1]: setattr(ref[1], 'pos', p))
-            row.bind(size=lambda s, sz, ref=bg_rects[-1]: setattr(ref[1], 'size', sz))
-
-            chk_w = Widget(
-                size_hint_x=None,
-                width=dp(32),
-            )
-            _sel = (i == 0)
-            chk_w.bind(pos=lambda s, p, sel=_sel: _draw_cb(s, sel))
-            chk_w.bind(size=lambda s, sz, sel=_sel: _draw_cb(s, sel))
-            chk_data.append((chk_w, _sel))
+            chk_w = Widget(size_hint_x=None, width=dp(32))
 
             opt_lbl = Label(
                 text=opt_text,
                 font_size=sp(12),
-                color=C_ACCENT if i == 0 else C_TEXT,
+                color=C_TEXT,
                 halign="left",
                 valign="middle",
                 text_size=(None, None),
-                bold=(i == 0),
+                bold=False,
                 size_hint_x=1,
             )
             opt_lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
 
             row.add_widget(chk_w)
             row.add_widget(opt_lbl)
-            lbl_refs.append(opt_lbl)
+            chk_widgets.append(chk_w)
+            lbl_widgets.append(opt_lbl)
+            row_widgets.append(row)
             card.add_widget(row)
 
-            def _make_press(_idx):
-                def _on_press(*_args):
-                    state["score"] = values[_idx]
-                    state["selected"] = _idx
-                    for j in range(len(chk_data)):
-                        is_sel = (j == _idx)
-                        chk_data[j] = (chk_data[j][0], is_sel)
-                        chk_w_j, _ = chk_data[j]
-                        _draw_cb(chk_w_j, is_sel)
-                        bg_rects[j][0].rgba = C_ACCENT if is_sel else get_color_from_hex("#F8F8F8")
-                        lbl_refs[j].color = C_ACCENT if is_sel else C_TEXT
-                        lbl_refs[j].bold = is_sel
-                return _on_press
+        def _on_card_touch(card_widget, touch):
+            if not card_widget.collide_point(*touch.pos):
+                return False
+            for idx, row in enumerate(row_widgets):
+                if row.collide_point(*touch.pos):
+                    _select(idx)
+                    return True
+            return False
 
-            overlay = Button(
-                size_hint=(1, 1),
-                background_normal="",
-                background_down="",
-                background_color=(0, 0, 0, 0),
-                color=(0, 0, 0, 0),
-            )
-            overlay.bind(on_press=_make_press(i))
-            row.add_widget(overlay)
+        card.bind(on_touch_down=_on_card_touch)
+
+        def _init_checkboxes(_dt):
+            _select(0)
+
+        from kivy.clock import Clock
+        Clock.schedule_once(_init_checkboxes)
 
         layout.add_widget(card)
         return card
