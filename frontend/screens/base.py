@@ -1,5 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.widget import Widget
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -99,18 +100,21 @@ class ScaleScreen(Screen):
         if values is None:
             values = list(range(len(options)))
 
+        num_opts = len(options)
+        card_h = dp(44) + dp(34) * num_opts
+
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=dp(80),
-            padding=[dp(12), dp(6)],
-            spacing=dp(4),
+            height=card_h,
+            padding=[dp(12), dp(8)],
+            spacing=dp(2),
         )
         with card.canvas.before:
             from kivy.graphics import Color, RoundedRectangle
             Color(*C_CARD)
             card._bg = RoundedRectangle(
-                pos=card.pos, size=card.size, radius=[dp(8)]
+                pos=card.pos, size=card.size, radius=[dp(10)]
             )
         card.bind(pos=lambda s, p: setattr(card._bg, 'pos', p))
         card.bind(size=lambda s, sz: setattr(card._bg, 'size', sz))
@@ -122,43 +126,110 @@ class ScaleScreen(Screen):
             halign="left",
             valign="middle",
             text_size=(None, None),
-            size_hint_y=0.45,
+            size_hint_y=None,
+            height=dp(38),
         )
         lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
         card.add_widget(lbl)
 
-        btn_row = BoxLayout(
-            size_hint_y=0.55,
-            spacing=dp(4),
-        )
-
         state = {"score": values[0], "selected": 0}
         card._option_state = state
 
-        btn_refs = []
+        bg_rects = []
+        chk_data = []
+        lbl_refs = []
+
+        def _draw_cb(widget, is_selected):
+            from kivy.graphics import Line
+            widget.canvas.after.clear()
+            with widget.canvas.after:
+                if is_selected:
+                    Color(*C_ACCENT)
+                    RoundedRectangle(
+                        pos=(widget.x + dp(4), widget.y + dp(4)),
+                        size=(dp(24), dp(24)),
+                        radius=[dp(4)],
+                    )
+                    Color(1, 1, 1, 1)
+                    Line(points=[
+                        widget.x + dp(10), widget.y + dp(16),
+                        widget.x + dp(14), widget.y + dp(10),
+                        widget.x + dp(22), widget.y + dp(22),
+                    ], width=dp(2.5), cap="round", joint="round")
+                else:
+                    Color(*C_DIVIDER)
+                    Line(
+                        rounded_rectangle=(widget.x + dp(4), widget.y + dp(4),
+                                           dp(24), dp(24), dp(4)),
+                        width=dp(1.5),
+                    )
+
         for i, (opt_text, val) in enumerate(zip(options, values)):
-            btn = Button(
-                text=opt_text,
-                font_size=sp(11),
-                bold=(i == 0),
-                background_normal="",
-                background_color=C_ACCENT if i == 0 else C_BG,
-                color=get_color_from_hex("#FFFFFF") if i == 0 else C_TEXT,
+            row = BoxLayout(
+                size_hint_y=None,
+                height=dp(32),
+                spacing=dp(8),
+                padding=[dp(4), 0],
             )
-            btn_refs.append(btn)
 
-            def _on_press(_btn, _idx=i, _refs=btn_refs, _st=state, _vals=values, _opts=options):
-                _st["score"] = _vals[_idx]
-                _st["selected"] = _idx
-                for j, b in enumerate(_refs):
-                    b.background_color = C_ACCENT if j == _idx else C_BG
-                    b.color = get_color_from_hex("#FFFFFF") if j == _idx else C_TEXT
-                    b.bold = (j == _idx)
+            with row.canvas.before:
+                from kivy.graphics import Color as GColor, Rectangle
+                _bg_c = GColor(*C_ACCENT) if i == 0 else GColor(*get_color_from_hex("#F8F8F8"))
+                _bg_r = Rectangle(pos=row.pos, size=row.size)
+            bg_rects.append((_bg_c, _bg_r))
+            row.bind(pos=lambda s, p, ref=bg_rects[-1]: setattr(ref[1], 'pos', p))
+            row.bind(size=lambda s, sz, ref=bg_rects[-1]: setattr(ref[1], 'size', sz))
 
-            btn.bind(on_press=_on_press)
-            btn_row.add_widget(btn)
+            chk_w = Widget(
+                size_hint_x=None,
+                width=dp(32),
+            )
+            _sel = (i == 0)
+            chk_w.bind(pos=lambda s, p, sel=_sel: _draw_cb(s, sel))
+            chk_w.bind(size=lambda s, sz, sel=_sel: _draw_cb(s, sel))
+            chk_data.append((chk_w, _sel))
 
-        card.add_widget(btn_row)
+            opt_lbl = Label(
+                text=opt_text,
+                font_size=sp(12),
+                color=C_ACCENT if i == 0 else C_TEXT,
+                halign="left",
+                valign="middle",
+                text_size=(None, None),
+                bold=(i == 0),
+                size_hint_x=1,
+            )
+            opt_lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
+
+            row.add_widget(chk_w)
+            row.add_widget(opt_lbl)
+            lbl_refs.append(opt_lbl)
+            card.add_widget(row)
+
+            def _make_press(_idx):
+                def _on_press(*_args):
+                    state["score"] = values[_idx]
+                    state["selected"] = _idx
+                    for j in range(len(chk_data)):
+                        is_sel = (j == _idx)
+                        chk_data[j] = (chk_data[j][0], is_sel)
+                        chk_w_j, _ = chk_data[j]
+                        _draw_cb(chk_w_j, is_sel)
+                        bg_rects[j][0].rgba = C_ACCENT if is_sel else get_color_from_hex("#F8F8F8")
+                        lbl_refs[j].color = C_ACCENT if is_sel else C_TEXT
+                        lbl_refs[j].bold = is_sel
+                return _on_press
+
+            overlay = Button(
+                size_hint=(1, 1),
+                background_normal="",
+                background_down="",
+                background_color=(0, 0, 0, 0),
+                color=(0, 0, 0, 0),
+            )
+            overlay.bind(on_press=_make_press(i))
+            row.add_widget(overlay)
+
         layout.add_widget(card)
         return card
 

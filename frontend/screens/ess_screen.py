@@ -1,17 +1,22 @@
 from frontend.screens.base import ScaleScreen
 
-OPTS = ["Nunca (0)", "Leve (1)", "Moderado (2)", "Alto (3)"]
+OPTS = [
+    "Sin posibilidad de adormecerse (0)",
+    "Ligera posibilidad de adormecerse (1)",
+    "Posibilidad moderada de adormecerse (2)",
+    "Posibilidad alta de adormecerse (3)",
+]
 VALS = [0, 1, 2, 3]
 
 QS = [
-    "1. Sentado/a, leyendo",
-    "2. Viendo television",
+    "1. Sentado/a y leyendo",
+    "2. Viendo la television",
     "3. Sentado/a inactivo/a en un lugar publico",
-    "4. De pasajero/a en coche, sin parar 1h",
-    "5. Acostado/a a descansar por la tarde",
-    "6. Sentado/a, hablando con alguien",
+    "4. Sentado/a 1h como pasajero/a en un coche",
+    "5. Tumbado/a por la tarde para descansar",
+    "6. Sentado/a y hablando con otra persona",
     "7. Sentado/a tranquilamente despues de comer",
-    "8. En coche, parado/a en el trafico",
+    "8. Sentado/a en un coche, parado/a en un atasco",
 ]
 
 
