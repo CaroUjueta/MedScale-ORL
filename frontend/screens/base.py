@@ -7,6 +7,8 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.utils import get_color_from_hex
 from kivy.app import App
+from kivy.metrics import dp, sp
+from kivy.core.window import Window
 
 C_PRIMARY = get_color_from_hex("#1976D2")
 C_PRIMARY_DARK = get_color_from_hex("#1565C0")
@@ -27,7 +29,6 @@ def navigate_to(screen_name):
 class ScaleScreen(Screen):
     title_text = ""
     result_prefix = "Puntaje total:"
-    icon_text = ""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -40,8 +41,8 @@ class ScaleScreen(Screen):
         header = BoxLayout(
             orientation="horizontal",
             size_hint_y=None,
-            height=56,
-            padding=[8, 0],
+            height=dp(52),
+            padding=[dp(8), 0],
         )
         with header.canvas.before:
             from kivy.graphics import Color, Rectangle
@@ -53,12 +54,12 @@ class ScaleScreen(Screen):
         back = Button(
             text="<",
             size_hint=(None, None),
-            size=(48, 40),
+            size=(dp(44), dp(36)),
             pos_hint={"center_y": 0.5},
             background_normal="",
             background_color=C_ACCENT,
             color=get_color_from_hex("#FFFFFF"),
-            font_size="18sp",
+            font_size=sp(18),
             bold=True,
         )
         back.bind(on_press=lambda _: navigate_to("home"))
@@ -66,7 +67,7 @@ class ScaleScreen(Screen):
 
         header.add_widget(Label(
             text=self.title_text,
-            font_size="17sp",
+            font_size=sp(16),
             bold=True,
             color=get_color_from_hex("#FFFFFF"),
             halign="left",
@@ -75,16 +76,16 @@ class ScaleScreen(Screen):
             size_hint_x=1,
         ))
         header.children[-1].bind(
-            width=lambda s, w: setattr(s, 'text_size', (w - 16, None))
+            width=lambda s, w: setattr(s, 'text_size', (w - dp(12), None))
         )
         return header
 
     def _build_body(self):
-        sv = ScrollView(bar_width=4, bar_color=C_DIVIDER)
+        sv = ScrollView(bar_width=dp(3), bar_color=C_DIVIDER)
         content = BoxLayout(
             orientation="vertical",
-            padding=[20, 16],
-            spacing=12,
+            padding=[dp(16), dp(12)],
+            spacing=dp(10),
             size_hint_y=None,
         )
         content.bind(minimum_height=content.setter("height"))
@@ -102,37 +103,37 @@ class ScaleScreen(Screen):
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=72,
-            padding=[12, 6],
-            spacing=2,
+            height=dp(70),
+            padding=[dp(12), dp(6)],
+            spacing=dp(2),
         )
         with card.canvas.before:
-            from kivy.graphics import Color, Rectangle, RoundedRectangle
+            from kivy.graphics import Color, RoundedRectangle
             Color(*C_CARD)
             card._bg = RoundedRectangle(
-                pos=card.pos, size=card.size, radius=[8]
+                pos=card.pos, size=card.size, radius=[dp(8)]
             )
         card.bind(pos=lambda s, p: setattr(card._bg, 'pos', p))
         card.bind(size=lambda s, sz: setattr(card._bg, 'size', sz))
 
         lbl = Label(
             text=text,
-            font_size="13sp",
+            font_size=sp(13),
             color=C_TEXT,
             halign="left",
             valign="middle",
             text_size=(None, None),
             size_hint_y=0.55,
         )
-        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - 8, None)))
+        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
         card.add_widget(lbl)
 
         spinner = Spinner(
             text=options[0],
             values=options,
             size_hint=(None, None),
-            size=(140, 34),
-            font_size="13sp",
+            size=(dp(140), dp(34)),
+            font_size=sp(13),
             background_normal="",
             background_color=C_BG,
             color=C_TEXT,
@@ -153,36 +154,36 @@ class ScaleScreen(Screen):
         opt.background_normal = ""
         opt.background_color = C_CARD
         opt.color = C_TEXT
-        opt.font_size = "13sp"
+        opt.font_size = sp(13)
         return opt
 
     def _numeric_input(self, layout, text, hint):
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=72,
-            padding=[12, 6],
-            spacing=2,
+            height=dp(70),
+            padding=[dp(12), dp(6)],
+            spacing=dp(2),
         )
         with card.canvas.before:
             from kivy.graphics import Color, RoundedRectangle
             Color(*C_CARD)
             card._bg = RoundedRectangle(
-                pos=card.pos, size=card.size, radius=[8]
+                pos=card.pos, size=card.size, radius=[dp(8)]
             )
         card.bind(pos=lambda s, p: setattr(card._bg, 'pos', p))
         card.bind(size=lambda s, sz: setattr(card._bg, 'size', sz))
 
         lbl = Label(
             text=text,
-            font_size="13sp",
+            font_size=sp(13),
             color=C_TEXT,
             halign="left",
             valign="middle",
             text_size=(None, None),
             size_hint_y=0.55,
         )
-        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - 8, None)))
+        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
         card.add_widget(lbl)
 
         ti = TextInput(
@@ -190,42 +191,41 @@ class ScaleScreen(Screen):
             multiline=False,
             input_filter="float",
             size_hint_y=0.45,
-            font_size="14sp",
-            padding=[10, 8],
+            font_size=sp(14),
+            padding=[dp(10), dp(8)],
             background_normal="",
             background_active="",
             background_color=C_BG,
             cursor_color=C_PRIMARY,
             foreground_color=C_TEXT,
             hint_text_color=C_TEXT_SEC,
-            cursor_width=2,
+            cursor_width=dp(2),
         )
         card.add_widget(ti)
         layout.add_widget(card)
         return ti
 
     def _section(self, layout, text):
-        layout.add_widget(Label(
+        lbl = Label(
             text=text,
-            font_size="14sp",
+            font_size=sp(13),
             bold=True,
             color=C_PRIMARY,
             size_hint_y=None,
-            height=32,
+            height=dp(30),
             halign="left",
             valign="middle",
             text_size=(None, None),
-        ))
-        layout.children[-1].bind(
-            width=lambda s, w: setattr(s, 'text_size', (w - 8, None))
         )
+        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
+        layout.add_widget(lbl)
 
     def _calc_btn(self, layout, callback):
         btn = Button(
             text="Calcular",
             size_hint_y=None,
-            height=52,
-            font_size="16sp",
+            height=dp(50),
+            font_size=sp(16),
             bold=True,
             background_normal="",
             background_color=C_PRIMARY,
@@ -238,21 +238,21 @@ class ScaleScreen(Screen):
         box = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=72,
-            padding=[16, 8],
+            height=dp(68),
+            padding=[dp(16), dp(8)],
         )
         with box.canvas.before:
             from kivy.graphics import Color, RoundedRectangle
             Color(*C_RESULT_BG)
             box._bg = RoundedRectangle(
-                pos=box.pos, size=box.size, radius=[12]
+                pos=box.pos, size=box.size, radius=[dp(12)]
             )
         box.bind(pos=lambda s, p: setattr(box._bg, 'pos', p))
         box.bind(size=lambda s, sz: setattr(box._bg, 'size', sz))
 
         self._result_lbl = Label(
             text="",
-            font_size="24sp",
+            font_size=sp(22),
             bold=True,
             color=C_RESULT,
             halign="center",

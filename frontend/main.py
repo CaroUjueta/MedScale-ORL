@@ -1,7 +1,14 @@
+import os
+os.environ.setdefault("KIVY_NO_ARGS", "1")
+
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, NoTransition
+from kivy.uix.screenmanager import ScreenManager, SlideTransition
 from kivy.utils import get_color_from_hex
 from kivy.core.window import Window
+from kivy.metrics import dp
+
+Window.clearcolor = get_color_from_hex("#F0F2F5")
+Window.softinput_mode = "resize"
 
 from frontend.screens.home import HomeScreen
 from frontend.screens.ess_screen import EssScreen
@@ -12,14 +19,14 @@ from frontend.screens.lund_mackay_screen import LundMackayScreen
 from frontend.screens.thi_screen import ThiScreen
 from frontend.screens.etdq7_screen import Etdq7Screen
 
-BG = get_color_from_hex("#F0F2F5")
-
-Window.clearcolor = BG
-
 
 class MedScaleORLApp(App):
+    title = "MedScale-ORL"
+
     def build(self):
-        sm = ScreenManager(transition=NoTransition())
+        sm = ScreenManager(
+            transition=SlideTransition(duration=0.15),
+        )
         sm.add_widget(HomeScreen(name="home"))
         sm.add_widget(EssScreen(name="ess"))
         sm.add_widget(StopBangScreen(name="stop_bang"))

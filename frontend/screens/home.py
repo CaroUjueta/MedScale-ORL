@@ -1,11 +1,12 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
-from kivy.uix.button import Button
-from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from kivy.app import App
+from kivy.metrics import dp, sp
 
 C_PRIMARY = get_color_from_hex("#1976D2")
 C_PRIMARY_DARK = get_color_from_hex("#1565C0")
@@ -13,8 +14,8 @@ C_ACCENT = get_color_from_hex("#26A69A")
 C_BG = get_color_from_hex("#F0F2F5")
 C_CARD = get_color_from_hex("#FFFFFF")
 C_TEXT = get_color_from_hex("#1A1A2E")
-C_TEXT_SEC = get_color_from_hex("#6B7280")
-C_TAB_SEL = get_color_from_hex("#E3F2FD")
+C_TEXT_SEC = get_color_from_hex("#9CA3AF")
+C_BOTTOM = get_color_from_hex("#FFFFFF")
 
 
 def navigate_to(name):
@@ -27,11 +28,11 @@ class ScaleCard(Button):
         self.text = label
         self._target = target
         self.size_hint_y = None
-        self.height = 56
+        self.height = dp(54)
         self.background_normal = ""
         self.background_color = C_PRIMARY
         self.color = get_color_from_hex("#FFFFFF")
-        self.font_size = "15sp"
+        self.font_size = sp(15)
         self.bold = True
         self.bind(on_press=self._go)
 
@@ -39,95 +40,153 @@ class ScaleCard(Button):
         navigate_to(self._target)
 
 
-class HomeScreen(Screen):
-    def __init__(self, **kwargs):
+class NavButton(Button):
+    def __init__(self, label, **kwargs):
         super().__init__(**kwargs)
+        self.text = label
+        self.size_hint_x = 1
+        self.background_normal = ""
+        self.background_color = C_BOTTOM
+        self.color = C_TEXT_SEC
+        self.font_size = sp(11)
+        self.bold = True
+        self.bind(on_press=self._on_press)
+
+    def _on_press(self, _):
+        tab_idx = int(self._tab_name == "Rinosinusitis") + int(self._tab_name == "Otologia")
+        HomeScreen.instance.set_tab(tab_idx)
+
+
+class HomeScreen(Screen):
+    instance = None
+
+    def __init__(self, **kwargs):
+        HomeScreen.instance = self
+        super().__init__(**kwargs)
+        self._current_tab = 0
+
         root = BoxLayout(orientation="vertical")
 
-        header = BoxLayout(size_hint_y=None, height=56)
-        with header.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(*C_PRIMARY_DARK)
-            header._bg = Rectangle(pos=header.pos, size=header.size)
-        header.bind(pos=lambda s, p: setattr(header._bg, 'pos', p))
-        header.bind(size=lambda s, sz: setattr(header._bg, 'size', sz))
-        header.add_widget(Label(
-            text="  MedScale-ORL",
-            font_size="20sp",
-            bold=True,
-            color=get_color_from_hex("#FFFFFF"),
-            halign="left",
-            valign="middle",
-        ))
-        root.add_widget(header)
+        self._content_area = BoxLayout(orientation="vertical", size_hint_y=1)
+        root.add_widget(self._content_area)
 
-        tp = TabbedPanel(
-            tab_height=46,
-            do_default_tab=False,
-            background_color=C_BG,
+        self._build_bottom_nav(root)
+        self._build_tabs_content()
+        self.set_tab(0)
+
+        self.add_widget(root)
+
+    def _build_bottom_nav(self, root):
+        self._nav_buttons = []
+        nav_labels = ["Apnea", "Rinosinusitis", "Otologia"]
+
+        nav = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=dp(60),
+            padding=[0, dp(4), 0, dp(4)],
         )
+        with nav.canvas.before:
+            from kivy.graphics import Color, Rectangle
+            Color(*C_BOTTOM)
+            nav._bg = Rectangle(pos=nav.pos, size=nav.size)
+            Color(0, 0, 0, 0.08)
+            nav._shadow = Rectangle(pos=(nav.x, nav.top), size=(nav.width, dp(1)))
+        nav.bind(pos=lambda s, p: (setattr(nav._bg, 'pos', p), setattr(nav._shadow, 'pos', (p[0], p[1] + s.height))))
+        nav.bind(size=lambda s, sz: (setattr(nav._bg, 'size', sz), setattr(nav._shadow, 'size', (sz[0], dp(1)))))
+
+        for label in nav_labels:
+            btn = Button(
+                text=label,
+                size_hint_x=1,
+                background_normal="",
+                background_color=C_BOTTOM,
+                color=C_TEXT_SEC,
+                font_size=sp(11),
+                bold=True,
+            )
+            self._nav_buttons.append(btn)
+            nav.add_widget(btn)
+
+        self._nav_buttons[0].bind(on_press=lambda _: self.set_tab(0))
+        self._nav_buttons[1].bind(on_press=lambda _: self.set_tab(1))
+        self._nav_buttons[2].bind(on_press=lambda _: self.set_tab(2))
+
+        root.add_widget(nav)
+
+    def _build_tabs_content(self):
+        self._tabs = []
 
         categories = [
-            ("Apnea", [
-                ("Epworth (ESS)", "ess"),
+            ("Apnea Obstructiva del Sueno", [
+                ("Epworth Sleepiness Scale (ESS)", "ess"),
                 ("STOP-BANG", "stop_bang"),
-                ("IMC", "imc"),
+                ("IMC (Indice de Masa Corporal)", "imc"),
             ]),
             ("Rinosinusitis", [
                 ("SNOT-22", "snot22"),
                 ("Lund Mackay", "lund_mackay"),
             ]),
             ("Otologia", [
-                ("THI", "thi"),
+                ("THI (Tinnitus Handicap Inventory)", "thi"),
                 ("ETDQ-7", "etdq7"),
             ]),
         ]
 
-        for tab_name, scales in categories:
-            tab = TabbedPanelItem(text=tab_name)
-            tab.background_normal = ""
-            tab.background_disabled_normal = ""
-            tab.background_color = C_BG
-            tab.color = C_TEXT_SEC
-            tab.bold = True
-            tab.bind(state=self._on_tab_state)
+        for cat_name, scales in categories:
+            container = BoxLayout(orientation="vertical")
 
-            inner = BoxLayout(
-                orientation="vertical",
-                padding=[20, 12],
-                spacing=8,
-            )
-
-            inner.add_widget(Label(
-                text=tab_name,
-                font_size="18sp",
-                bold=True,
-                color=C_PRIMARY,
+            header = BoxLayout(
+                orientation="horizontal",
                 size_hint_y=None,
-                height=40,
+                height=dp(52),
+                padding=[dp(20), 0],
+            )
+            with header.canvas.before:
+                from kivy.graphics import Color, Rectangle
+                Color(*C_PRIMARY_DARK)
+                header._bg = Rectangle(pos=header.pos, size=header.size)
+            header.bind(pos=lambda s, p: setattr(s._bg, 'pos', p))
+            header.bind(size=lambda s, sz: setattr(s._bg, 'size', sz))
+            header.add_widget(Label(
+                text=cat_name,
+                font_size=sp(17),
+                bold=True,
+                color=get_color_from_hex("#FFFFFF"),
                 halign="left",
                 valign="middle",
             ))
-            inner.children[-1].bind(
-                width=lambda s, w: setattr(s, 'text_size', (w - 8, None))
+            header.children[-1].bind(
+                width=lambda s, w: setattr(s, 'text_size', (w - dp(16), None))
             )
+            container.add_widget(header)
+
+            inner = BoxLayout(
+                orientation="vertical",
+                padding=[dp(16), dp(12)],
+                spacing=dp(8),
+                size_hint_y=None,
+            )
+            inner.bind(minimum_height=inner.setter("height"))
 
             for label, target in scales:
                 inner.add_widget(ScaleCard(label=label, target=target))
 
-            inner.add_widget(Label(size_hint_y=1))
+            inner.add_widget(Widget(size_hint_y=1))
 
             sv = ScrollView(bar_width=0)
             sv.add_widget(inner)
-            tab.content = sv
-            tp.add_widget(tab)
+            container.add_widget(sv)
+            self._tabs.append(container)
 
-        tp.default_tab_text = "Apnea"
-        root.add_widget(tp)
-        self.add_widget(root)
-
-    def _on_tab_state(self, instance, value):
-        if value == "down":
-            instance.color = C_PRIMARY
-        else:
-            instance.color = C_TEXT_SEC
+    def set_tab(self, idx):
+        self._current_tab = idx
+        self._content_area.clear_widgets()
+        self._content_area.add_widget(self._tabs[idx])
+        for i, btn in enumerate(self._nav_buttons):
+            if i == idx:
+                btn.color = C_PRIMARY
+                btn.bold = True
+            else:
+                btn.color = C_TEXT_SEC
+                btn.bold = False
