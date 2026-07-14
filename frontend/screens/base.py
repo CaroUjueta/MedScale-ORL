@@ -142,7 +142,7 @@ class ScaleScreen(Screen):
                 font_size=sp(11),
                 bold=(i == 0),
                 background_normal="",
-                background_color=C_PRIMARY if i == 0 else C_BG,
+                background_color=C_ACCENT if i == 0 else C_BG,
                 color=get_color_from_hex("#FFFFFF") if i == 0 else C_TEXT,
             )
             btn_refs.append(btn)
@@ -151,7 +151,7 @@ class ScaleScreen(Screen):
                 _st["score"] = _vals[_idx]
                 _st["selected"] = _idx
                 for j, b in enumerate(_refs):
-                    b.background_color = C_PRIMARY if j == _idx else C_BG
+                    b.background_color = C_ACCENT if j == _idx else C_BG
                     b.color = get_color_from_hex("#FFFFFF") if j == _idx else C_TEXT
                     b.bold = (j == _idx)
 

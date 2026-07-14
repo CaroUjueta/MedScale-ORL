@@ -4,7 +4,7 @@ OPTS = ["No (0)", "A veces (2)", "Si (4)"]
 VALS = [0, 2, 4]
 
 QS = [
-    "1. Le impiden los zumbidos conciliar el sueno",
+    "1. Le impiden los zumbidos conciliar el sueño",
     "2. Le impiden los zumbidos concentrate",
     "3. Le impiden los zumbidos escuchar con claridad",
     "4. Le causan los zumbidos enfado",

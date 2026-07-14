@@ -15,7 +15,7 @@ QS = [
     "9. Dolor/presion facial",
     "10. Dificultad para dormir",
     "11. Despertar durante la noche",
-    "12. Falta de sueno reparador",
+    "12. Falta de sueño reparador",
     "13. Cansancio / falta de energia",
     "14. Disminucion de concentracion",
     "15. Disminucion de productividad",

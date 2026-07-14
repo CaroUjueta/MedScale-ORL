@@ -118,7 +118,7 @@ class HomeScreen(Screen):
         self._tabs = []
 
         categories = [
-            ("Apnea Obstructiva del Sueno", [
+            ("Apnea Obstructiva del Sueño", [
                 ("Epworth Sleepiness Scale (ESS)", "ess"),
                 ("STOP-BANG", "stop_bang"),
                 ("IMC (Indice de Masa Corporal)", "imc"),
