@@ -1,10 +1,37 @@
 # MedScale-ORL
 
-Aplicación diseñada para la evaluación clínica en **otorrinolaringología**, integrando diferentes escalas y cuestionarios validados para el diagnóstico y seguimiento de pacientes.
+Calculadora de escalas clínicas para **otorrinolaringología**. App móvil standalone construida con Kivy.
 
-## Características principales
-- Acceso rápido a escalas estandarizadas-
-- Interfaz intuitiva y amigable para profesionales de la salud.
-- Resultados automáticos con interpretación clínica básica.
-- Historial de evaluaciones por paciente.
-- Exportación de reportes en PDF.
+## Escalas disponibles
+
+### Apnea Obstructiva del Sueño
+- **ESS** (Epworth Sleepiness Scale) — puntaje 0-24
+- **STOP-BANG** — puntaje 0-8
+- **IMC** (Índice de Masa Corporal) — kg/m²
+
+### Rinosinusitis
+- **SNOT-22** — puntaje 0-110
+- **Lund Mackay** — puntaje 0-24 (bilateral)
+
+### Otología
+- **THI** (Tinnitus Handicap Inventory) — puntaje 0-100
+- **ETDQ-7** — puntaje 7-49
+
+## Ejecutar
+
+```bash
+# Crear entorno virtual (si no existe)
+python3 -m venv venv
+source venv/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar
+python3 -m frontend
+```
+
+## Dependencias
+
+- Python 3.10+
+- Kivy >= 2.2.0
