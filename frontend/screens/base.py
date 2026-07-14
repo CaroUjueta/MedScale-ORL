@@ -2,7 +2,6 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
-from kivy.uix.spinner import Spinner
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.utils import get_color_from_hex
@@ -103,9 +102,9 @@ class ScaleScreen(Screen):
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=dp(70),
+            height=dp(80),
             padding=[dp(12), dp(6)],
-            spacing=dp(2),
+            spacing=dp(4),
         )
         with card.canvas.before:
             from kivy.graphics import Color, RoundedRectangle
@@ -123,39 +122,45 @@ class ScaleScreen(Screen):
             halign="left",
             valign="middle",
             text_size=(None, None),
-            size_hint_y=0.55,
+            size_hint_y=0.45,
         )
         lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
         card.add_widget(lbl)
 
-        spinner = Spinner(
-            text=options[0],
-            values=options,
-            size_hint=(None, None),
-            size=(dp(140), dp(34)),
-            font_size=sp(13),
-            background_normal="",
-            background_color=C_BG,
-            color=C_TEXT,
-            option_cls=self._spinner_option,
+        btn_row = BoxLayout(
+            size_hint_y=0.55,
+            spacing=dp(4),
         )
-        spinner._score_map = dict(zip(options, values))
-        spinner_row = BoxLayout(size_hint_y=0.45)
-        spinner_row.add_widget(spinner)
-        spinner_row.add_widget(Label(size_hint_x=1))
-        card.add_widget(spinner_row)
 
+        state = {"score": values[0], "selected": 0}
+        card._option_state = state
+
+        btn_refs = []
+        for i, (opt_text, val) in enumerate(zip(options, values)):
+            btn = Button(
+                text=opt_text,
+                font_size=sp(11),
+                bold=(i == 0),
+                background_normal="",
+                background_color=C_PRIMARY if i == 0 else C_BG,
+                color=get_color_from_hex("#FFFFFF") if i == 0 else C_TEXT,
+            )
+            btn_refs.append(btn)
+
+            def _on_press(_btn, _idx=i, _refs=btn_refs, _st=state, _vals=values, _opts=options):
+                _st["score"] = _vals[_idx]
+                _st["selected"] = _idx
+                for j, b in enumerate(_refs):
+                    b.background_color = C_PRIMARY if j == _idx else C_BG
+                    b.color = get_color_from_hex("#FFFFFF") if j == _idx else C_TEXT
+                    b.bold = (j == _idx)
+
+            btn.bind(on_press=_on_press)
+            btn_row.add_widget(btn)
+
+        card.add_widget(btn_row)
         layout.add_widget(card)
-        return spinner
-
-    def _spinner_option(self, *args, **kwargs):
-        from kivy.uix.spinner import SpinnerOption
-        opt = SpinnerOption(**kwargs)
-        opt.background_normal = ""
-        opt.background_color = C_CARD
-        opt.color = C_TEXT
-        opt.font_size = sp(13)
-        return opt
+        return card
 
     def _numeric_input(self, layout, text, hint):
         card = BoxLayout(

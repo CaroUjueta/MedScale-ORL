@@ -20,11 +20,11 @@ class Etdq7Screen(ScaleScreen):
 
     def _build_form(self, layout):
         self._section(layout, "1 = nunca, 7 = siempre:")
-        self._sp = []
+        self._cards = []
         for q in QS:
-            self._sp.append(self._question(layout, q, OPTS, VALS))
+            self._cards.append(self._question(layout, q, OPTS, VALS))
         self._calc_btn(layout, self._calc)
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(s._score_map[s.text] for s in self._sp))
+        self._show_result(sum(c._option_state["score"] for c in self._cards))

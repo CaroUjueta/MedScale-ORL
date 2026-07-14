@@ -34,14 +34,14 @@ class LundMackayScreen(ScaleScreen):
         self._section(layout, "TAC: 0=ninguna, 1=parcial, 2=total")
 
         self._section(layout, "-- Lado izquierdo --")
-        self._sp_l = []
+        self._cards_l = []
         for q in LEFT:
-            self._sp_l.append(self._question(layout, q, OPTS, VALS))
+            self._cards_l.append(self._question(layout, q, OPTS, VALS))
 
         self._section(layout, "-- Lado derecho --")
-        self._sp_r = []
+        self._cards_r = []
         for q in RIGHT:
-            self._sp_r.append(self._question(layout, q, OPTS, VALS))
+            self._cards_r.append(self._question(layout, q, OPTS, VALS))
 
         self._calc_btn(layout, self._calc)
 
@@ -58,8 +58,8 @@ class LundMackayScreen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        left = sum(s._score_map[s.text] for s in self._sp_l)
-        right = sum(s._score_map[s.text] for s in self._sp_r)
+        left = sum(c._option_state["score"] for c in self._cards_l)
+        right = sum(c._option_state["score"] for c in self._cards_r)
         self._sub_left.text = f"Izquierdo: {left}"
         self._sub_right.text = f"Derecho: {right}"
         self._show_result(left + right)
