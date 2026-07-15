@@ -2,7 +2,7 @@
 
 Calculadora de escalas clínicas para **otorrinolaringología**. App móvil standalone (sin backend) construida con Kivy, compilable a Android/iOS via Buildozer.
 
-**Autores:** Carolina Ujueta & Francys Ujueta — 2025
+**Autores:** Carolina Ujueta & Francys Ujueta — 2026
 
 ## Escalas disponibles
 
