@@ -114,6 +114,17 @@ class HomeScreen(Screen):
 
         root.add_widget(nav)
 
+        credits = Label(
+            text="Carolina Ujueta & Francys Ujueta",
+            font_size=sp(9),
+            color=get_color_from_hex("#B0B0B0"),
+            size_hint_y=None,
+            height=dp(20),
+            halign="center",
+            valign="middle",
+        )
+        root.add_widget(credits)
+
     def _build_tabs_content(self):
         self._tabs = []
 
