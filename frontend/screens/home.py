@@ -139,20 +139,20 @@ class HomeScreen(Screen):
             header = BoxLayout(
                 orientation="horizontal",
                 size_hint_y=None,
-                height=dp(52),
-                padding=[dp(20), 0],
+                height=dp(44),
+                padding=[dp(16), 0],
             )
             with header.canvas.before:
                 from kivy.graphics import Color, Rectangle
-                Color(*C_PRIMARY_DARK)
+                Color(*C_BG)
                 header._bg = Rectangle(pos=header.pos, size=header.size)
             header.bind(pos=lambda s, p: setattr(s._bg, 'pos', p))
             header.bind(size=lambda s, sz: setattr(s._bg, 'size', sz))
             header.add_widget(Label(
-                text=cat_name,
-                font_size=sp(17),
+                text=cat_name.upper(),
+                font_size=sp(11),
                 bold=True,
-                color=get_color_from_hex("#FFFFFF"),
+                color=C_TEXT_SEC,
                 halign="left",
                 valign="middle",
             ))

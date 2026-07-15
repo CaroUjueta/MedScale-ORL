@@ -271,19 +271,25 @@ class ScaleScreen(Screen):
         return ti
 
     def _section(self, layout, text):
+        row = BoxLayout(
+            size_hint_y=None,
+            height=dp(28),
+            spacing=dp(8),
+            padding=[dp(4), 0],
+        )
         lbl = Label(
             text=text,
-            font_size=sp(13),
-            bold=True,
-            color=C_PRIMARY,
-            size_hint_y=None,
-            height=dp(30),
+            font_size=sp(11),
+            bold=False,
+            color=C_TEXT_SEC,
+            size_hint_x=1,
             halign="left",
             valign="middle",
             text_size=(None, None),
         )
         lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
-        layout.add_widget(lbl)
+        row.add_widget(lbl)
+        layout.add_widget(row)
 
     def _calc_btn(self, layout, callback):
         btn = Button(
