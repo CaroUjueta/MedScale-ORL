@@ -222,11 +222,11 @@ class ScaleScreen(Screen):
         layout.add_widget(card)
         return card
 
-    def _numeric_input(self, layout, text, hint):
+    def _numeric_input(self, layout, text, hint, card_height=None):
         card = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=dp(70),
+            height=card_height or dp(70),
             padding=[dp(12), dp(6)],
             spacing=dp(2),
         )
