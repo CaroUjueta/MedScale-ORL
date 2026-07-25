@@ -1,10 +1,10 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.widget import Widget
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from kivy.uix.image import Image as KivyImage
 from kivy.utils import get_color_from_hex
 from kivy.app import App
 from kivy.metrics import dp, sp
@@ -20,6 +20,41 @@ C_TEXT_SEC = get_color_from_hex("#6B7280")
 C_RESULT = get_color_from_hex("#0D6E6E")
 C_RESULT_BG = get_color_from_hex("#E0F2F1")
 C_DIVIDER = get_color_from_hex("#E5E7EB")
+
+_chk_tex_on = None
+_chk_tex_off = None
+
+
+def _render_chk_textures():
+    global _chk_tex_on, _chk_tex_off
+    if _chk_tex_on is not None:
+        return
+    from kivy.graphics import Fbo, Color, ClearBuffers, ClearColor, RoundedRectangle, Line
+    sz = 64
+    pad = 8
+    rad = 10
+    for selected in (False, True):
+        fbo = Fbo(size=(sz, sz))
+        fbo.add(ClearColor(0, 0, 0, 0))
+        fbo.add(ClearBuffers())
+        with fbo:
+            if selected:
+                Color(*C_ACCENT)
+                RoundedRectangle(pos=(pad, pad), size=(sz - pad*2, sz - pad*2), radius=[rad])
+                Color(1, 1, 1, 1)
+                Line(points=[
+                    sz*0.27, sz*0.52,
+                    sz*0.40, sz*0.38,
+                    sz*0.72, sz*0.70,
+                ], width=3, cap="round", joint="round")
+            else:
+                Color(*C_DIVIDER)
+                Line(rounded_rectangle=(pad, pad, sz - pad*2, sz - pad*2, rad), width=2)
+        fbo.draw()
+        if selected:
+            _chk_tex_on = fbo.texture
+        else:
+            _chk_tex_off = fbo.texture
 
 
 def navigate_to(screen_name):
@@ -97,11 +132,18 @@ class ScaleScreen(Screen):
         raise NotImplementedError
 
     def _question(self, layout, text, options, values=None):
+        card = self._question_card(text, options, values)
+        layout.add_widget(card)
+        return card
+
+    def _question_card(self, text, options, values=None):
         if values is None:
             values = list(range(len(options)))
 
+        _render_chk_textures()
+
         num_opts = len(options)
-        card_h = dp(44) + dp(34) * num_opts
+        card_h = dp(54) + dp(34) * num_opts
 
         card = BoxLayout(
             orientation="vertical",
@@ -138,30 +180,8 @@ class ScaleScreen(Screen):
         chk_widgets = []
         lbl_widgets = []
 
-        def _draw_cb(widget, is_selected):
-            from kivy.graphics import Line
-            widget.canvas.after.clear()
-            with widget.canvas.after:
-                if is_selected:
-                    Color(*C_ACCENT)
-                    RoundedRectangle(
-                        pos=(widget.x + dp(4), widget.y + dp(4)),
-                        size=(dp(24), dp(24)),
-                        radius=[dp(4)],
-                    )
-                    Color(1, 1, 1, 1)
-                    Line(points=[
-                        widget.x + dp(10), widget.y + dp(16),
-                        widget.x + dp(14), widget.y + dp(10),
-                        widget.x + dp(22), widget.y + dp(22),
-                    ], width=dp(2.5), cap="round", joint="round")
-                else:
-                    Color(*C_DIVIDER)
-                    Line(
-                        rounded_rectangle=(widget.x + dp(4), widget.y + dp(4),
-                                           dp(24), dp(24), dp(4)),
-                        width=dp(1.5),
-                    )
+        def _draw_cb(img, is_selected):
+            img.texture = _chk_tex_on if is_selected else _chk_tex_off
 
         def _select(idx):
             state["score"] = values[idx]
@@ -181,7 +201,12 @@ class ScaleScreen(Screen):
                 padding=[dp(4), 0],
             )
 
-            chk_w = Widget(size_hint_x=None, width=dp(32))
+            chk_img = KivyImage(
+                size_hint_x=None,
+                size=(dp(24), dp(24)),
+                allow_stretch=True,
+                texture=_chk_tex_off,
+            )
 
             opt_lbl = Label(
                 text=opt_text,
@@ -195,9 +220,9 @@ class ScaleScreen(Screen):
             )
             opt_lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w - dp(8), None)))
 
-            row.add_widget(chk_w)
+            row.add_widget(chk_img)
             row.add_widget(opt_lbl)
-            chk_widgets.append(chk_w)
+            chk_widgets.append(chk_img)
             lbl_widgets.append(opt_lbl)
             row_widgets.append(row)
             card.add_widget(row)
@@ -219,7 +244,6 @@ class ScaleScreen(Screen):
         from kivy.clock import Clock
         Clock.schedule_once(_init_checkboxes)
 
-        layout.add_widget(card)
         return card
 
     def _numeric_input(self, layout, text, hint, card_height=None):
