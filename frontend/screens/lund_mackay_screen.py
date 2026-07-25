@@ -83,6 +83,18 @@ class LundMackayScreen(ScaleScreen):
             self._cards_r.append(self._question_card(q, OPTS, VALS))
             right_col.add_widget(self._cards_r[-1])
 
+        self._sub_left = Label(
+            text="Subtotal: 0", font_size="13sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_y=None, height=dp(28),
+        )
+        left_col.add_widget(self._sub_left)
+
+        self._sub_right = Label(
+            text="Subtotal: 0", font_size="13sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_y=None, height=dp(28),
+        )
+        right_col.add_widget(self._sub_right)
+
         pair.add_widget(left_col)
         pair.add_widget(right_col)
 
@@ -94,22 +106,11 @@ class LundMackayScreen(ScaleScreen):
         layout.add_widget(pair)
 
         self._calc_btn(layout, self._calc)
-
-        self._sub_left = Label(
-            text="", font_size="14sp", bold=True, color=C_PRIMARY,
-            size_hint_y=None, height=28,
-        )
-        layout.add_widget(self._sub_left)
-        self._sub_right = Label(
-            text="", font_size="14sp", bold=True, color=C_PRIMARY,
-            size_hint_y=None, height=28,
-        )
-        layout.add_widget(self._sub_right)
         self._result_box(layout)
 
     def _calc(self, _):
         left = sum(c._option_state["score"] for c in self._cards_l)
         right = sum(c._option_state["score"] for c in self._cards_r)
-        self._sub_left.text = f"Izquierdo: {left}"
-        self._sub_right.text = f"Derecho: {right}"
+        self._sub_left.text = f"Subtotal: {left}"
+        self._sub_right.text = f"Subtotal: {right}"
         self._show_result(left + right)
