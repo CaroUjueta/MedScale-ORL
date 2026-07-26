@@ -18,6 +18,8 @@ QS = [
 class StopBangScreen(ScaleScreen):
     title_text = "STOP-BANG"
     result_prefix = "STOP-BANG:"
+    scale_name = "STOP-BANG"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "Responda Si o No:")

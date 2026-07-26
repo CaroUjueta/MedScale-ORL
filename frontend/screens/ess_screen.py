@@ -23,6 +23,8 @@ QS = [
 class EssScreen(ScaleScreen):
     title_text = "Epworth (ESS)"
     result_prefix = "ESS:"
+    scale_name = "ESS"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "Probabilidad de quedarse dormido/a:")

@@ -4,11 +4,12 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
 from kivy.graphics import Color, RoundedRectangle
 
-from frontend.screens.base import ScaleScreen, C_BG, C_TEXT, C_TEXT_SEC, C_PRIMARY, C_CARD
+from frontend.screens.base import ScaleScreen, C_BG, C_TEXT, C_TEXT_SEC, C_PRIMARY, C_CARD, C_ACCENT
 
 _ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
 
@@ -32,6 +33,7 @@ def _classify(bmi):
 class ImcScreen(ScaleScreen):
     title_text = "IMC"
     result_prefix = "IMC:"
+    scale_name = "IMC"
 
     def _build_body(self):
         root = BoxLayout(
@@ -156,6 +158,22 @@ class ImcScreen(ScaleScreen):
         )
         card.add_widget(self._silueta)
 
+        self._last_puntaje = None
+        self._save_btn_widget = Button(
+            text="Guardar resultado",
+            size_hint_y=None,
+            height=dp(46),
+            font_size=sp(14),
+            bold=True,
+            background_normal="",
+            background_color=C_ACCENT,
+            color=get_color_from_hex("#FFFFFF"),
+        )
+        self._save_btn_widget.bind(on_press=lambda _: self._show_save_popup())
+        self._save_btn_widget.opacity = 0
+        self._save_btn_widget.disabled = True
+        card.add_widget(self._save_btn_widget)
+
         layout.add_widget(card)
 
     def _calc(self, _):
@@ -173,6 +191,15 @@ class ImcScreen(ScaleScreen):
             self._cat_lbl.color = color
             self._silueta.source = img
             self._silueta.reload()
+            self._last_puntaje = round(bmi, 1)
+            self._save_btn_widget.opacity = 1
+            self._save_btn_widget.disabled = False
         except (ValueError, ZeroDivisionError):
             self._show_result("Ingrese valores")
             self._cat_lbl.text = ""
+
+    def _get_responses(self):
+        return {
+            "Peso (kg)": self._peso.text,
+            "Estatura (cm)": self._talla.text,
+        }

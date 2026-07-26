@@ -23,6 +23,7 @@ QS = [
 class Etdq7Screen(ScaleScreen):
     title_text = "ETDQ-7"
     result_prefix = "ETDQ-7:"
+    scale_name = "ETDQ-7"
 
     def _build_form(self, layout):
         self._section(layout, "1 = nunca, 7 = siempre:")
@@ -114,3 +115,10 @@ class Etdq7Screen(ScaleScreen):
         self._sub_left.text = f"Subtotal: {left}"
         self._sub_right.text = f"Subtotal: {right}"
         self._show_result(left + right)
+
+    def _get_responses(self):
+        resp = {}
+        for i, q in enumerate(QS):
+            resp[f"Izq - {q}"] = self._cards_l[i]._option_state["selected"]
+            resp[f"Der - {q}"] = self._cards_r[i]._option_state["selected"]
+        return resp

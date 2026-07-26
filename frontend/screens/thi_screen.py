@@ -35,6 +35,8 @@ QS = [
 class ThiScreen(ScaleScreen):
     title_text = "THI"
     result_prefix = "THI:"
+    scale_name = "THI"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "Responda No, A veces o Si:")

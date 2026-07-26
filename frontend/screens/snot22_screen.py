@@ -32,6 +32,8 @@ QS = [
 class Snot22Screen(ScaleScreen):
     title_text = "SNOT-22"
     result_prefix = "SNOT-22:"
+    scale_name = "SNOT-22"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "0 = nada, 5 = peor problema:")

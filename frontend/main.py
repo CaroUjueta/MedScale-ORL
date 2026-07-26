@@ -10,6 +10,8 @@ from kivy.metrics import dp
 Window.clearcolor = get_color_from_hex("#F0F2F5")
 Window.softinput_mode = "resize"
 
+from frontend.database import init_db
+
 from frontend.screens.home import HomeScreen
 from frontend.screens.ess_screen import EssScreen
 from frontend.screens.stop_bang_screen import StopBangScreen
@@ -18,12 +20,18 @@ from frontend.screens.snot22_screen import Snot22Screen
 from frontend.screens.lund_mackay_screen import LundMackayScreen
 from frontend.screens.thi_screen import ThiScreen
 from frontend.screens.etdq7_screen import Etdq7Screen
+from frontend.screens.patient_list_screen import PatientListScreen
+from frontend.screens.patient_form_screen import PatientFormScreen
+from frontend.screens.patient_detail_screen import PatientDetailScreen
+from frontend.screens.settings_screen import SettingsScreen
 
 
 class MedScaleORLApp(App):
     title = "MedScale-ORL"
 
     def build(self):
+        init_db()
+
         sm = ScreenManager(
             transition=SlideTransition(duration=0.15),
         )
@@ -35,6 +43,10 @@ class MedScaleORLApp(App):
         sm.add_widget(LundMackayScreen(name="lund_mackay"))
         sm.add_widget(ThiScreen(name="thi"))
         sm.add_widget(Etdq7Screen(name="etdq7"))
+        sm.add_widget(PatientListScreen(name="patient_list"))
+        sm.add_widget(PatientFormScreen(name="patient_form"))
+        sm.add_widget(PatientDetailScreen(name="patient_detail"))
+        sm.add_widget(SettingsScreen(name="settings"))
         return sm
 
 

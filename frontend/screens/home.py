@@ -190,6 +190,45 @@ class HomeScreen(Screen):
             container.add_widget(sv)
             self._tabs.append(container)
 
+        self._add_utility_buttons()
+
+    def _add_utility_buttons(self):
+        util_box = BoxLayout(
+            orientation="vertical",
+            padding=[dp(16), dp(8)],
+            spacing=dp(6),
+            size_hint_y=None,
+            height=dp(120),
+        )
+
+        patients_btn = Button(
+            text="Mis Pacientes",
+            size_hint_y=None,
+            height=dp(50),
+            font_size=sp(14),
+            bold=True,
+            background_normal="",
+            background_color=C_ACCENT,
+            color=get_color_from_hex("#FFFFFF"),
+        )
+        patients_btn.bind(on_press=lambda _: navigate_to("patient_list"))
+        util_box.add_widget(patients_btn)
+
+        settings_btn = Button(
+            text="Configuracion",
+            size_hint_y=None,
+            height=dp(50),
+            font_size=sp(14),
+            bold=True,
+            background_normal="",
+            background_color=C_PRIMARY,
+            color=get_color_from_hex("#FFFFFF"),
+        )
+        settings_btn.bind(on_press=lambda _: navigate_to("settings"))
+        util_box.add_widget(settings_btn)
+
+        self._tabs[0].add_widget(util_box)
+
     def set_tab(self, idx):
         self._current_tab = idx
         self._content_area.clear_widgets()
