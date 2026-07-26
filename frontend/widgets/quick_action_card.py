@@ -39,16 +39,14 @@ class QuickActionCard(Widget):
         self.canvas.before.clear()
         with self.canvas.before:
             Color(0, 0, 0, 0.04)
-            RoundedRectangle(pos=(self.x + dp(1), self.y - dp(1)), size=self.size, radius=[dp(16)])
+            RoundedRectangle(pos=(self.x + dp(1), self.y - dp(1)), size=self.size, radius=[dp(18)])
             Color(1, 1, 1, 1)
-            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(16)])
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(18)])
             Color(*get_color_from_hex("#F3F4F6"))
-            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(16)), width=dp(0.7))
+            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(18)), width=dp(0.7))
 
             cx = self.x + self.width / 2
             cy = self.y + self.height - dp(30)
-            Color(*get_color_from_hex("#ECFAFC"))
-            Ellipse(pos=(cx - dp(20), cy - dp(20)), size=(dp(40), dp(40)))
 
             self._draw_icon(cx, cy)
 

@@ -2,10 +2,10 @@ from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
-from kivy.graphics import Color, RoundedRectangle, Line, Ellipse
+from kivy.graphics import Color, RoundedRectangle, Line
 
 
-class InfoBanner(Widget):
+class EvidenceBanner(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
@@ -37,7 +37,7 @@ class InfoBanner(Widget):
         self.canvas.before.clear()
         with self.canvas.before:
             Color(*get_color_from_hex("#ECFAFC"))
-            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(16)])
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(18)])
 
             cx, cy = self.x + dp(32), self.y + self.height / 2
             Color(*get_color_from_hex("#14828A"))
@@ -55,11 +55,7 @@ class InfoBanner(Widget):
                 width=dp(1.5),
             )
             Line(
-                points=[
-                    cx - dp(3), cy - dp(1),
-                    cx - dp(1), cy + dp(1),
-                    cx + dp(3), cy - dp(3),
-                ],
+                points=[cx - dp(3), cy - dp(1), cx - dp(1), cy + dp(1), cx + dp(3), cy - dp(3)],
                 width=dp(1.3),
             )
 

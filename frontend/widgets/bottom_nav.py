@@ -2,14 +2,13 @@ from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
-from kivy.graphics import Color, Line, Rectangle, Ellipse
-
+from kivy.graphics import Color, Line, Rectangle
 
 C_ACTIVE = get_color_from_hex("#14828A")
 C_INACTIVE = get_color_from_hex("#9CA3AF")
 
 
-class BottomNav(Widget):
+class BottomNavigation(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
