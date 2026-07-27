@@ -62,31 +62,27 @@ class HomeScreen(Screen):
         section = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=dp(380),
-            spacing=dp(16),
+            spacing=dp(14),
         )
+        section.bind(minimum_height=section.setter("height"))
 
         header_row = BoxLayout(
             size_hint_y=None,
-            height=dp(28),
+            height=dp(32),
             spacing=dp(8),
         )
-        header_row.add_widget(Widget(
-            size_hint_x=None,
-            width=dp(4),
-        ))
         with header_row.canvas.before:
             from kivy.graphics import Color, Rectangle
             Color(*get_color_from_hex("#14828A"))
             header_row._line = Rectangle(
-                pos=(header_row.x + dp(20), header_row.y + dp(4)),
+                pos=(header_row.x + dp(20), header_row.y + dp(6)),
                 size=(dp(3), dp(20)),
             )
-        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(4))))
+        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(6))))
 
         lbl = Label(
             text="Explora por area",
-            font_size=sp(14),
+            font_size=sp(16),
             bold=True,
             color=C_TEXT,
             halign="left",
@@ -108,31 +104,27 @@ class HomeScreen(Screen):
         section = BoxLayout(
             orientation="vertical",
             size_hint_y=None,
-            height=dp(240),
-            spacing=dp(16),
+            spacing=dp(14),
         )
+        section.bind(minimum_height=section.setter("height"))
 
         header_row = BoxLayout(
             size_hint_y=None,
-            height=dp(28),
+            height=dp(32),
             spacing=dp(8),
         )
-        header_row.add_widget(Widget(
-            size_hint_x=None,
-            width=dp(4),
-        ))
         with header_row.canvas.before:
             from kivy.graphics import Color, Rectangle
             Color(*get_color_from_hex("#14828A"))
             header_row._line = Rectangle(
-                pos=(header_row.x + dp(20), header_row.y + dp(4)),
+                pos=(header_row.x + dp(20), header_row.y + dp(6)),
                 size=(dp(3), dp(20)),
             )
-        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(4))))
+        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(6))))
 
         lbl = Label(
             text="Acciones rapidas",
-            font_size=sp(14),
+            font_size=sp(16),
             bold=True,
             color=C_TEXT,
             halign="left",
@@ -151,8 +143,8 @@ class HomeScreen(Screen):
             ("Guias rapidas", "Algoritmos y recom.", "book"),
         ]
 
-        row1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(100))
-        row2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(100))
+        row1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(120))
+        row2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(120))
         for i, (title, desc, icon) in enumerate(actions):
             card = QuickActionCard(title=title, description=desc, icon_type=icon)
             if i < 2:

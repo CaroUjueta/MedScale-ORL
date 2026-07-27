@@ -15,10 +15,10 @@ class ChipBadge(Widget):
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
-        self.size = (dp(70), dp(28))
+        self.size = (dp(72), dp(30))
         self._lbl = Label(
             text=text,
-            font_size=sp(9),
+            font_size=sp(10),
             color=get_color_from_hex("#2563EB"),
             halign="center",
             valign="middle",
@@ -29,14 +29,15 @@ class ChipBadge(Widget):
         self.add_widget(self._lbl)
         self.bind(pos=self._draw, size=self._draw)
         self.bind(pos=lambda s, p: setattr(s._lbl, 'pos', p))
+        self.bind(size=lambda s, sz: setattr(s._lbl, 'size', sz))
 
     def _draw(self, *a):
         self.canvas.before.clear()
         with self.canvas.before:
-            Color(1, 1, 1, 0.8)
+            Color(1, 1, 1, 0.85)
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(14)])
-            Color(0.85, 0.88, 0.95, 1)
-            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(14)), width=dp(0.7))
+            Color(0.82, 0.87, 0.96, 1)
+            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(14)), width=dp(0.8))
 
 
 class AreaCard(Widget):
@@ -59,7 +60,7 @@ class AreaCard(Widget):
 
         self._title_lbl = Label(
             text=title.upper(),
-            font_size=sp(13),
+            font_size=sp(14),
             bold=True,
             color=get_color_from_hex("#133E7C"),
             halign="left",
@@ -70,7 +71,7 @@ class AreaCard(Widget):
 
         self._subtitle_lbl = Label(
             text=subtitle,
-            font_size=sp(11),
+            font_size=sp(12),
             color=get_color_from_hex("#6B7280"),
             halign="left",
             valign="top",
@@ -87,11 +88,11 @@ class AreaCard(Widget):
         self._arrow = Button(
             text=">",
             size_hint=(None, None),
-            size=(dp(36), dp(36)),
+            size=(dp(42), dp(42)),
             background_normal="",
             background_color=get_color_from_hex("#FFFFFF"),
             color=get_color_from_hex("#6B7280"),
-            font_size=sp(16),
+            font_size=sp(18),
             bold=True,
         )
         self.add_widget(self._arrow)
@@ -108,10 +109,10 @@ class AreaCard(Widget):
     def _draw(self, *a):
         self.canvas.before.clear()
         with self.canvas.before:
-            Color(0, 0, 0, 0.05)
-            RoundedRectangle(pos=(self.x + dp(1), self.y - dp(2)), size=self.size, radius=[dp(22)])
+            Color(0, 0, 0, 0.06)
+            RoundedRectangle(pos=(self.x + dp(2), self.y - dp(3)), size=self.size, radius=[dp(22)])
             Color(0, 0, 0, 0.03)
-            RoundedRectangle(pos=(self.x + dp(2), self.y - dp(1)), size=self.size, radius=[dp(22)])
+            RoundedRectangle(pos=(self.x + dp(1), self.y - dp(1)), size=self.size, radius=[dp(22)])
             Color(*self._bg)
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(22)])
 
@@ -121,10 +122,10 @@ class AreaCard(Widget):
 
         self._img.pos = (x + pad, y + h / 2 - dp(36))
 
-        tx = x + dp(100)
-        tw = w - dp(156)
+        tx = x + dp(104)
+        tw = w - dp(160)
 
-        self._title_lbl.pos = (tx, y + h - dp(58))
+        self._title_lbl.pos = (tx, y + h - dp(56))
         self._title_lbl.text_size = (tw, None)
         self._title_lbl.halign = "left"
 
@@ -133,11 +134,11 @@ class AreaCard(Widget):
         self._subtitle_lbl.halign = "left"
 
         chip_x = tx
-        chip_y = y + dp(14)
+        chip_y = y + dp(16)
         for i, chip in enumerate(self._chips):
-            chip.pos = (chip_x + i * dp(74), chip_y)
+            chip.pos = (chip_x + i * dp(78), chip_y)
 
-        self._arrow.pos = (x + w - dp(52), y + h / 2 - dp(18))
+        self._arrow.pos = (x + w - dp(62), y + h / 2 - dp(21))
 
 
 class ApneaCard(AreaCard):

@@ -9,11 +9,11 @@ class EvidenceBanner(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
-        self.height = dp(80)
+        self.height = dp(88)
 
         self._title_lbl = Label(
             text="Evidencia que guia tu practica",
-            font_size=sp(13),
+            font_size=sp(14),
             bold=True,
             color=get_color_from_hex("#0D6E73"),
             halign="left",
@@ -22,7 +22,7 @@ class EvidenceBanner(Widget):
         )
         self._desc_lbl = Label(
             text="Todas las escalas estan validadas y basadas\nen guias internacionales.",
-            font_size=sp(10),
+            font_size=sp(11),
             color=get_color_from_hex("#6B7280"),
             halign="left",
             valign="top",
@@ -39,9 +39,9 @@ class EvidenceBanner(Widget):
             Color(*get_color_from_hex("#ECFAFC"))
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(18)])
 
-            cx, cy = self.x + dp(32), self.y + self.height / 2
+            cx, cy = self.x + dp(36), self.y + self.height / 2
             Color(*get_color_from_hex("#14828A"))
-            sw, sh = dp(16), dp(20)
+            sw, sh = dp(18), dp(22)
             Line(
                 points=[
                     cx - sw / 2, cy + sh / 2 - dp(2),
@@ -52,22 +52,22 @@ class EvidenceBanner(Widget):
                     cx, cy + sh / 2 + dp(2),
                     cx - sw / 2, cy + sh / 2 - dp(2),
                 ],
-                width=dp(1.5),
+                width=dp(1.8),
             )
             Line(
-                points=[cx - dp(3), cy - dp(1), cx - dp(1), cy + dp(1), cx + dp(3), cy - dp(3)],
-                width=dp(1.3),
+                points=[cx - dp(4), cy - dp(1), cx - dp(1), cy + dp(2), cx + dp(4), cy - dp(3)],
+                width=dp(1.5),
             )
 
-            ax = self.x + self.width - dp(28)
+            ax = self.x + self.width - dp(32)
             ay = self.y + self.height / 2
             Color(*get_color_from_hex("#14828A"))
-            Line(points=[ax - dp(6), ay + dp(4), ax + dp(2), ay, ax - dp(6), ay - dp(4)], width=dp(1.6))
+            Line(points=[ax - dp(6), ay + dp(5), ax + dp(3), ay, ax - dp(6), ay - dp(5)], width=dp(1.8))
 
     def _layout(self, *a):
-        tx = self.x + dp(56)
-        tw = self.width - dp(90)
-        self._title_lbl.pos = (tx, self.y + self.height - dp(44))
+        tx = self.x + dp(62)
+        tw = self.width - dp(100)
+        self._title_lbl.pos = (tx, self.y + self.height - dp(48))
         self._title_lbl.text_size = (tw, None)
-        self._desc_lbl.pos = (tx, self.y + dp(10))
+        self._desc_lbl.pos = (tx, self.y + dp(12))
         self._desc_lbl.text_size = (tw, None)

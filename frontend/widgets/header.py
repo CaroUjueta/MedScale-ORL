@@ -32,7 +32,7 @@ class _HamburgerIcon(Widget):
             Color(*C_WHITE)
             for i in range(3):
                 y = cy + dp(6) - i * dp(6)
-                Rectangle(pos=(cx - dp(9), y - dp(1)), size=(dp(18), dp(2)))
+                Rectangle(pos=(cx - dp(10), y - dp(1.2)), size=(dp(20), dp(2.4)))
 
 
 class _TopIconButton(Widget):
@@ -51,14 +51,14 @@ class _TopIconButton(Widget):
             Ellipse(pos=(self.x, self.y), size=self.size)
             Color(*C_WHITE)
             if self._type == "search":
-                r = dp(7)
-                Line(circle=(cx - dp(1), cy + dp(1), r), width=dp(1.5))
-                Line(points=[cx - dp(1) + r * 0.7, cy + dp(1) - r * 0.7, cx + dp(5), cy - dp(5)], width=dp(1.5))
+                r = dp(8)
+                Line(circle=(cx - dp(1), cy + dp(1), r), width=dp(1.8))
+                Line(points=[cx - dp(1) + r * 0.7, cy + dp(1) - r * 0.7, cx + dp(6), cy - dp(6)], width=dp(1.8))
             elif self._type == "notif":
-                w, h = dp(14), dp(12)
-                Line(rounded_rectangle=(cx - w / 2, cy - h / 2 + dp(2), w, h, dp(3)), width=dp(1.4))
-                Line(circle=(cx, cy - h / 2 + dp(4), dp(1.5)), width=dp(1.2))
-                Line(points=[cx, cy - h / 2 + dp(2.5), cx, cy - h / 2 + dp(0.5)], width=dp(1.2))
+                w, h = dp(16), dp(14)
+                Line(rounded_rectangle=(cx - w / 2, cy - h / 2 + dp(2), w, h, dp(3)), width=dp(1.6))
+                Line(circle=(cx, cy - h / 2 + dp(5), dp(1.8)), width=dp(1.4))
+                Line(points=[cx, cy - h / 2 + dp(3), cx, cy - h / 2 + dp(0.5)], width=dp(1.4))
 
 
 class HomeHeader(Widget):
@@ -71,7 +71,7 @@ class HomeHeader(Widget):
         self._search = _TopIconButton("search")
         self._notif = _TopIconButton("notif")
 
-        self._img_inicio = KivyImage(
+        self._img_left = KivyImage(
             source=os.path.join(_IMG, "Inicio.png"),
             size_hint=(None, None),
             size=(dp(72), dp(72)),
@@ -79,7 +79,7 @@ class HomeHeader(Widget):
             keep_ratio=True,
             fit_mode="contain",
         )
-        self._img_instrumentos = KivyImage(
+        self._img_right = KivyImage(
             source=os.path.join(_IMG, "Instrumentos.png"),
             size_hint=(None, None),
             size=(dp(90), dp(90)),
@@ -90,7 +90,7 @@ class HomeHeader(Widget):
 
         self._greeting = Label(
             text="Hola, Doctor(a)!",
-            font_size=sp(26),
+            font_size=sp(28),
             bold=True,
             color=C_WHITE,
             halign="center",
@@ -99,7 +99,7 @@ class HomeHeader(Widget):
         )
         self._subtitle = Label(
             text="Herramientas clinicas basadas en\nevidencia para Otorrinolaringologia",
-            font_size=sp(13),
+            font_size=sp(14),
             color=C_W70,
             halign="center",
             valign="top",
@@ -107,7 +107,7 @@ class HomeHeader(Widget):
         )
 
         for w in [self._hamburger, self._search, self._notif,
-                  self._img_inicio, self._img_instrumentos,
+                  self._img_left, self._img_right,
                   self._greeting, self._subtitle]:
             self.add_widget(w)
 
@@ -115,7 +115,7 @@ class HomeHeader(Widget):
 
     def _layout(self, *a):
         x, y, w, h = self.x, self.y, self.width, self.height
-        pad = dp(16)
+        pad = dp(20)
 
         self._hamburger.pos = (x + pad, y + h - pad - dp(44))
         self._search.pos = (x + w - pad - dp(40) - dp(44), y + h - pad - dp(40))
@@ -123,23 +123,23 @@ class HomeHeader(Widget):
 
         col_w = (w - pad * 2) / 3
 
-        self._img_inicio.pos = (x + pad + dp(4), y + dp(28))
+        self._img_left.pos = (x + pad, y + h / 2 - dp(36))
 
         center_x = x + col_w + col_w / 2
-        self._greeting.pos = (center_x - col_w / 2, y + h - dp(120))
+        self._greeting.pos = (center_x - col_w / 2, y + h - dp(110))
         self._greeting.text_size = (col_w - dp(16), None)
 
-        self._subtitle.pos = (center_x - col_w / 2, y + dp(40))
+        self._subtitle.pos = (center_x - col_w / 2, y + dp(36))
         self._subtitle.text_size = (col_w - dp(16), None)
 
-        self._img_instrumentos.pos = (x + w - dp(90) - pad, y + dp(22))
+        self._img_right.pos = (x + w - dp(90) - pad, y + h / 2 - dp(45))
 
     def _draw(self, *a):
         self.canvas.before.clear()
         x, y, w, h = self.x, self.y, self.width, self.height
         radius = dp(30)
         with self.canvas.before:
-            steps = 50
+            steps = 60
             for i in range(steps):
                 t = i / steps
                 r = C_DARK[0] + (C_LIGHT[0] - C_DARK[0]) * t

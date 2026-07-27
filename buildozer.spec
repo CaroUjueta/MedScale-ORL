@@ -6,6 +6,7 @@ package.domain = com.medscale
 
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ttf,json
+source.include_patterns = frontend/assets/*
 
 version = 1.0.0
 
