@@ -22,7 +22,7 @@ QS = [
 
 class Etdq7Screen(ScaleScreen):
     title_text = "ETDQ-7"
-    result_prefix = "ETDQ-7:"
+    result_prefix = "Total:"
 
     def _build_form(self, layout):
         self._section(layout, "1 = nunca, 7 = siempre:")
@@ -83,18 +83,6 @@ class Etdq7Screen(ScaleScreen):
             self._cards_r.append(self._question_card(q, OPTS, VALS))
             right_col.add_widget(self._cards_r[-1])
 
-        self._sub_left = Label(
-            text="Subtotal: 0", font_size="13sp", bold=True, color=C_PRIMARY,
-            halign="center", valign="middle", size_hint_y=None, height=dp(28),
-        )
-        left_col.add_widget(self._sub_left)
-
-        self._sub_right = Label(
-            text="Subtotal: 0", font_size="13sp", bold=True, color=C_PRIMARY,
-            halign="center", valign="middle", size_hint_y=None, height=dp(28),
-        )
-        right_col.add_widget(self._sub_right)
-
         pair.add_widget(left_col)
         pair.add_widget(right_col)
 
@@ -106,6 +94,49 @@ class Etdq7Screen(ScaleScreen):
         layout.add_widget(pair)
 
         self._calc_btn(layout, self._calc)
+
+        sub_pair = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=dp(56),
+            spacing=dp(6),
+        )
+
+        self._sub_left = Label(
+            text="Subtotal: 0", font_size="12sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_x=0.5,
+        )
+        sub_pair.add_widget(self._sub_left)
+
+        self._sub_right = Label(
+            text="Subtotal: 0", font_size="12sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_x=0.5,
+        )
+        sub_pair.add_widget(self._sub_right)
+
+        layout.add_widget(sub_pair)
+
+        div_pair = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=dp(28),
+            spacing=dp(6),
+        )
+
+        self._div_left = Label(
+            text="", font_size="11sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_x=0.5,
+        )
+        div_pair.add_widget(self._div_left)
+
+        self._div_right = Label(
+            text="", font_size="11sp", bold=True, color=C_PRIMARY,
+            halign="center", valign="middle", size_hint_x=0.5,
+        )
+        div_pair.add_widget(self._div_right)
+
+        layout.add_widget(div_pair)
+
         self._result_box(layout)
 
     def _calc(self, _):
@@ -113,4 +144,7 @@ class Etdq7Screen(ScaleScreen):
         right = sum(c._option_state["score"] for c in self._cards_r)
         self._sub_left.text = f"Subtotal: {left}"
         self._sub_right.text = f"Subtotal: {right}"
-        self._show_result(left + right)
+        self._div_left.text = f"Promedio: {left/7:.1f}"
+        self._div_right.text = f"Promedio: {right/7:.1f}"
+        total = left + right
+        self._result_lbl.text = f"{self.result_prefix} {total}"
