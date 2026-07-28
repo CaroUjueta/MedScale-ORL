@@ -9,6 +9,10 @@ from kivy.metrics import dp, sp
 from kivy.clock import Clock
 
 C_PRIMARY = get_color_from_hex("#1976D2")
+C_RESULT = get_color_from_hex("#0D6E6E")
+C_RESULT_BG = get_color_from_hex("#E0F2F1")
+C_RED = get_color_from_hex("#C62828")
+C_RED_BG = get_color_from_hex("#FFEBEE")
 
 OPTS = ["1", "2", "3", "4", "5", "6", "7"]
 VALS = [1, 2, 3, 4, 5, 6, 7]
@@ -24,9 +28,19 @@ QS = [
 ]
 
 
+def _interpretar(promedio):
+    if promedio < 2.0:
+        return "Función tubárica normal\n(sin evidencia de disfunción)"
+    elif promedio < 3.0:
+        return "Leve disfunción de la\ntrompa de Eustaquio"
+    elif promedio < 6.0:
+        return "Moderada disfunción de la\ntrompa de Eustaquio"
+    else:
+        return "Severa disfunción de la\ntrompa de Eustaquio"
+
+
 class Etdq7Screen(ScaleScreen):
     title_text = "ETDQ-7"
-    result_prefix = "Puntaje total:"
 
     def _build_form(self, layout):
         self._section(layout, "Durante el último mes, en qué grado le han afectado:")
@@ -41,25 +55,110 @@ class Etdq7Screen(ScaleScreen):
 
         self._calc_btn(layout, self._calc)
 
-        self._sub_pair = BoxLayout(
+        self._results_pair = BoxLayout(
             orientation="horizontal",
             size_hint_y=None,
-            height=dp(28),
-            spacing=dp(6),
+            height=dp(200),
+            spacing=dp(8),
         )
-        self._sub_left = Label(
-            text="Izquierdo: 0/7", font_size="12sp", bold=True, color=C_PRIMARY,
-            halign="center", valign="middle", size_hint_x=0.5,
-        )
-        self._sub_pair.add_widget(self._sub_left)
-        self._sub_right = Label(
-            text="Derecho: 0/7", font_size="12sp", bold=True, color=C_PRIMARY,
-            halign="center", valign="middle", size_hint_x=0.5,
-        )
-        self._sub_pair.add_widget(self._sub_right)
-        layout.add_widget(self._sub_pair)
 
-        self._result_box(layout)
+        self._col_left = self._build_result_column("Oído Izquierdo", C_PRIMARY, C_RESULT_BG)
+        self._col_right = self._build_result_column("Oído Derecho", C_PRIMARY, C_RESULT_BG, title_color=C_RED)
+
+        self._results_pair.add_widget(self._col_left["box"])
+        self._results_pair.add_widget(self._col_right["box"])
+
+        layout.add_widget(self._results_pair)
+
+    def _build_result_column(self, title, accent_color=None, bg_color=None, title_color=None):
+        if accent_color is None:
+            accent_color = C_PRIMARY
+        if bg_color is None:
+            bg_color = C_RESULT_BG
+        if title_color is None:
+            title_color = accent_color
+
+        box = BoxLayout(
+            orientation="vertical",
+            size_hint_x=0.5,
+            size_hint_y=None,
+            height=dp(200),
+            padding=[dp(12), dp(8)],
+            spacing=dp(4),
+        )
+        with box.canvas.before:
+            from kivy.graphics import Color, RoundedRectangle
+            Color(*bg_color)
+            box._bg = RoundedRectangle(
+                pos=box.pos, size=box.size, radius=[dp(12)]
+            )
+        box.bind(pos=lambda s, p: setattr(box._bg, 'pos', p))
+        box.bind(size=lambda s, sz: setattr(box._bg, 'size', sz))
+
+        title_lbl = Label(
+            text=title,
+            font_size=sp(13),
+            bold=True,
+            color=title_color,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(28),
+        )
+        box.add_widget(title_lbl)
+
+        total_lbl = Label(
+            text="Puntaje total: 0/49",
+            font_size=sp(14),
+            bold=True,
+            color=_base.C_RESULT,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(28),
+        )
+        box.add_widget(total_lbl)
+
+        avg_lbl = Label(
+            text="Promedio: 0.0/7",
+            font_size=sp(12),
+            color=_base.C_RESULT,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(24),
+        )
+        box.add_widget(avg_lbl)
+
+        interp_hdr = Label(
+            text="Interpretación:",
+            font_size=sp(11),
+            bold=True,
+            color=_base.C_TEXT_SEC,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(20),
+        )
+        box.add_widget(interp_hdr)
+
+        interp_lbl = Label(
+            text="",
+            font_size=sp(11),
+            color=_base.C_TEXT,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(48),
+        )
+        box.add_widget(interp_lbl)
+
+        return {
+            "box": box,
+            "total": total_lbl,
+            "avg": avg_lbl,
+            "interp": interp_lbl,
+        }
 
     def _add_question(self, layout, question_text):
         _base._render_chk_textures()
@@ -195,7 +294,14 @@ class Etdq7Screen(ScaleScreen):
     def _calc(self, _):
         left = sum(s["score"] for s in self._states_l)
         right = sum(s["score"] for s in self._states_r)
-        self._sub_left.text = f"Izquierdo: {left}/7"
-        self._sub_right.text = f"Derecho: {right}/7"
-        total = left + right
-        self._result_lbl.text = f"{self.result_prefix} {total}"
+
+        avg_l = left / 7.0
+        avg_r = right / 7.0
+
+        self._col_left["total"].text = f"Puntaje total: {left}/49"
+        self._col_left["avg"].text = f"Promedio: {avg_l:.1f}/7"
+        self._col_left["interp"].text = _interpretar(avg_l)
+
+        self._col_right["total"].text = f"Puntaje total: {right}/49"
+        self._col_right["avg"].text = f"Promedio: {avg_r:.1f}/7"
+        self._col_right["interp"].text = _interpretar(avg_r)
