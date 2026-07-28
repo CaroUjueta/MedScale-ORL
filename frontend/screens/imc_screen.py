@@ -13,11 +13,17 @@ from frontend.screens.base import ScaleScreen, C_BG, C_TEXT, C_TEXT_SEC, C_PRIMA
 _ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
 
 _CATS = [
+    # IMC < 18.5
     (18.5, "Bajo peso",        get_color_from_hex("#FF9800"), os.path.join(_ASSETS, "silueta_bajo_peso.png")),
+    # 18.5 ≤ IMC < 25
     (25.0, "Peso normal",      get_color_from_hex("#4CAF50"), os.path.join(_ASSETS, "silueta_peso_normal.png")),
+    # 25 ≤ IMC < 30
     (30.0, "Sobrepeso",        get_color_from_hex("#FF5722"), os.path.join(_ASSETS, "silueta_sobrepeso.png")),
+    # 30 ≤ IMC < 35
     (35.0, "Obesidad grado I", get_color_from_hex("#F44336"), os.path.join(_ASSETS, "silueta_obesidad_1.png")),
+    # 35 ≤ IMC < 40
     (40.0, "Obesidad grado II",get_color_from_hex("#C62828"), os.path.join(_ASSETS, "silueta_obesidad_2.png")),
+    # IMC ≥ 40
     (999,  "Obesidad grado III",get_color_from_hex("#B71C1C"), os.path.join(_ASSETS, "silueta_obesidad_3.png")),
 ]
 

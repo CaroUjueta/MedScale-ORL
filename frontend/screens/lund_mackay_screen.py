@@ -16,7 +16,7 @@ STRUCTURES = [
     "Etmoides posterior",
     "Seno esfenoidal",
     "Seno frontal",
-    "Complejo ostiomeatal",
+    "Complejo osteomeatal",
 ]
 
 
