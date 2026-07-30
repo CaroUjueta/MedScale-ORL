@@ -7,7 +7,7 @@ package.domain = com.medscale
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ttf,json
 
-version = 1.0.0
+version = 1.0.1
 
 requirements = python3,kivy
 
