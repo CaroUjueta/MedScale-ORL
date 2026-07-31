@@ -1,20 +1,41 @@
+import os
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image as KivyImage
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
 from kivy.graphics import Color, RoundedRectangle, Line
 
+_CWD = os.path.dirname(os.path.abspath(__file__))
+_IMG = os.path.join(_CWD, "..", "assets")
+
 
 class QuickActionCard(BoxLayout):
-    def __init__(self, title, description, **kwargs):
+    def __init__(self, title, description, icon=None, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
         self.size_hint_y = None
         self.padding = [dp(18), dp(20), dp(18), dp(18)]
         self.spacing = 0
 
-        self.add_widget(Widget(size_hint_y=None, height=dp(50)))
+        if icon:
+            anchor = AnchorLayout(size_hint_y=None, height=dp(52))
+            anchor.add_widget(
+                KivyImage(
+                    source=os.path.join(_IMG, icon),
+                    size_hint=(None, None),
+                    size=(dp(52), dp(52)),
+                    allow_stretch=False,
+                    keep_ratio=True,
+                    fit_mode="contain",
+                )
+            )
+            self.add_widget(anchor)
+            self.add_widget(Widget(size_hint_y=None, height=dp(14)))
+        else:
+            self.add_widget(Widget(size_hint_y=None, height=dp(50)))
 
         self._title_lbl = Label(
             text=title,
