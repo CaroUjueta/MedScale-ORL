@@ -20,6 +20,15 @@ QS = [
 ]
 
 
+def _interpretar_ess(puntaje):
+    if puntaje <= 6:
+        return "Sueño normal"
+    elif puntaje <= 8:
+        return "Somnolencia media"
+    else:
+        return "Somnolencia anómala\n(posiblemente patológica)"
+
+
 class EssScreen(ScaleScreen):
     title_text = "Epworth (ESS)"
     result_prefix = "ESS:"
@@ -35,4 +44,6 @@ class EssScreen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_ess(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
