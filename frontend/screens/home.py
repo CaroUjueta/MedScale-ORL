@@ -1,11 +1,14 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.metrics import dp, sp
+from kivy.graphics import Color, Rectangle
 
 from frontend.widgets.header import HomeHeader
 from frontend.widgets.area_card import ApneaCard, RinosinusitisCard, OtologiaCard
@@ -14,6 +17,7 @@ from frontend.widgets.info_banner import EvidenceBanner
 from frontend.widgets.bottom_nav import BottomNavigation
 
 C_TEXT = get_color_from_hex("#1F2937")
+C_ACCENT = get_color_from_hex("#14828A")
 
 
 def navigate_to(name):
@@ -39,16 +43,34 @@ class HomeScreen(Screen):
         )
         content = BoxLayout(
             orientation="vertical",
-            padding=[dp(20), dp(16)],
-            spacing=dp(24),
+            padding=[dp(20), 0],
             size_hint_y=None,
         )
         content.bind(minimum_height=content.setter("height"))
 
-        content.add_widget(self._build_explore_section())
-        content.add_widget(self._build_quick_actions())
-        content.add_widget(self._build_banner())
-        content.add_widget(Widget(size_hint_y=None, height=dp(8)))
+        content.add_widget(Widget(size_hint_y=None, height=dp(28)))
+
+        content.add_widget(self._section_title("Explora por area"))
+        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+
+        content.add_widget(ApneaCard())
+        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+        content.add_widget(RinosinusitisCard())
+        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+        content.add_widget(OtologiaCard())
+
+        content.add_widget(Widget(size_hint_y=None, height=dp(28)))
+
+        content.add_widget(self._section_title("Acciones rapidas"))
+        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+
+        content.add_widget(self._build_quick_grid())
+
+        content.add_widget(Widget(size_hint_y=None, height=dp(28)))
+
+        content.add_widget(EvidenceBanner())
+
+        content.add_widget(Widget(size_hint_y=None, height=dp(28)))
 
         sv.add_widget(content)
         root.add_widget(sv)
@@ -58,108 +80,64 @@ class HomeScreen(Screen):
 
         self.add_widget(root)
 
-    def _build_explore_section(self):
-        section = BoxLayout(
-            orientation="vertical",
-            size_hint_y=None,
-            spacing=dp(14),
-        )
-        section.bind(minimum_height=section.setter("height"))
-
-        header_row = BoxLayout(
+    def _section_title(self, text):
+        row = BoxLayout(
+            orientation="horizontal",
             size_hint_y=None,
             height=dp(32),
             spacing=dp(8),
         )
-        with header_row.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(*get_color_from_hex("#14828A"))
-            header_row._line = Rectangle(
-                pos=(header_row.x + dp(20), header_row.y + dp(6)),
+        with row.canvas.before:
+            Color(*C_ACCENT)
+            row._line = Rectangle(
+                pos=(row.x, row.y + dp(6)),
                 size=(dp(3), dp(20)),
             )
-        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(6))))
+        row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0], p[1] + dp(6))))
 
         lbl = Label(
-            text="Explora por area",
+            text=text,
             font_size=sp(16),
             bold=True,
             color=C_TEXT,
             halign="left",
             valign="middle",
-            text_size=(None, None),
             size_hint_x=1,
         )
-        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w, None)))
-        header_row.add_widget(lbl)
-        section.add_widget(header_row)
+        row.add_widget(lbl)
+        return row
 
-        section.add_widget(ApneaCard())
-        section.add_widget(RinosinusitisCard())
-        section.add_widget(OtologiaCard())
-
-        return section
-
-    def _build_quick_actions(self):
-        section = BoxLayout(
-            orientation="vertical",
+    def _build_quick_grid(self):
+        grid = GridLayout(
+            cols=2,
+            spacing=dp(16),
             size_hint_y=None,
-            spacing=dp(14),
         )
-        section.bind(minimum_height=section.setter("height"))
-
-        header_row = BoxLayout(
-            size_hint_y=None,
-            height=dp(32),
-            spacing=dp(8),
-        )
-        with header_row.canvas.before:
-            from kivy.graphics import Color, Rectangle
-            Color(*get_color_from_hex("#14828A"))
-            header_row._line = Rectangle(
-                pos=(header_row.x + dp(20), header_row.y + dp(6)),
-                size=(dp(3), dp(20)),
-            )
-        header_row.bind(pos=lambda s, p: setattr(s._line, 'pos', (p[0] + dp(20), p[1] + dp(6))))
-
-        lbl = Label(
-            text="Acciones rapidas",
-            font_size=sp(16),
-            bold=True,
-            color=C_TEXT,
-            halign="left",
-            valign="middle",
-            text_size=(None, None),
-            size_hint_x=1,
-        )
-        lbl.bind(width=lambda s, w: setattr(s, 'text_size', (w, None)))
-        header_row.add_widget(lbl)
-        section.add_widget(header_row)
+        grid.bind(minimum_height=grid.setter("height"))
 
         actions = [
-            ("Favoritos", "Escalas guardadas", "bookmark"),
-            ("Recientes", "Ultimas escalas", "history"),
-            ("Pacientes", "Registro y seguimiento", "groups"),
-            ("Guias rapidas", "Algoritmos y recom.", "book"),
+            ("Favoritos", "Escalas guardadas"),
+            ("Recientes", "Ultimas escalas"),
+            ("Pacientes", "Registro y seguimiento"),
+            ("Guias rapidas", "Algoritmos y recom."),
         ]
 
-        row1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(120))
-        row2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(120))
-        for i, (title, desc, icon) in enumerate(actions):
-            card = QuickActionCard(title=title, description=desc, icon_type=icon)
-            if i < 2:
-                row1.add_widget(card)
-            else:
-                row2.add_widget(card)
+        cards = []
+        for title, desc in actions:
+            card = QuickActionCard(title=title, description=desc)
+            cards.append(card)
+            grid.add_widget(card)
 
-        section.add_widget(row1)
-        section.add_widget(row2)
-        return section
+        def _size_cards(dt):
+            w = grid.width
+            if w < 1:
+                Clock.schedule_once(_size_cards, 0.05)
+                return
+            card_w = (w - dp(16)) / 2.0
+            card_h = card_w / 1.3
+            for c in cards:
+                c.height = card_h
 
-    def _build_banner(self):
-        container = BoxLayout(
-            size_hint_y=None,
-            height=dp(80),
-        )
-        container.add_widget(EvidenceBanner())
-        return container
+        Clock.schedule_once(_size_cards, 0.1)
+
+        return grid

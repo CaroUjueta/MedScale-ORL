@@ -1,8 +1,9 @@
 import os
-from kivy.uix.widget import Widget
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.image import Image as KivyImage
 from kivy.uix.button import Button
+from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
 from kivy.graphics import Color, RoundedRectangle, Line
@@ -15,14 +16,13 @@ class ChipBadge(Widget):
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (None, None)
-        self.size = (dp(72), dp(30))
+        self.size = (dp(110), dp(30))
         self._lbl = Label(
             text=text,
-            font_size=sp(10),
+            font_size=sp(13),
             color=get_color_from_hex("#2563EB"),
             halign="center",
             valign="middle",
-            text_size=(None, None),
             pos=self.pos,
             size=self.size,
         )
@@ -35,60 +35,80 @@ class ChipBadge(Widget):
         self.canvas.before.clear()
         with self.canvas.before:
             Color(1, 1, 1, 0.85)
-            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(14)])
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(15)])
             Color(0.82, 0.87, 0.96, 1)
-            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(14)), width=dp(0.8))
+            Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(15)), width=dp(0.8))
 
 
-class AreaCard(Widget):
+class AreaCard(BoxLayout):
     def __init__(self, title, subtitle, chips, bg_color, img_name, target=None, **kwargs):
         super().__init__(**kwargs)
+        self.orientation = "horizontal"
         self.size_hint_y = None
-        self.height = dp(140)
-        self._bg = bg_color
+        self.height = dp(116)
+        self.padding = [dp(14), dp(14), dp(14), dp(14)]
+        self._bg_color = bg_color
         self._target = target
 
         self._img = KivyImage(
             source=os.path.join(_IMG, img_name),
             size_hint=(None, None),
-            size=(dp(72), dp(72)),
-            allow_stretch=True,
+            size=(dp(86), dp(86)),
+            allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
         )
         self.add_widget(self._img)
 
+        self.add_widget(Widget(size_hint_x=None, width=dp(10)))
+
+        col = BoxLayout(
+            orientation="vertical",
+            size_hint_x=1,
+            spacing=dp(2),
+        )
+
         self._title_lbl = Label(
             text=title.upper(),
-            font_size=sp(14),
+            font_size=sp(18),
             bold=True,
             color=get_color_from_hex("#133E7C"),
             halign="left",
             valign="middle",
-            text_size=(None, None),
+            size_hint_y=None,
+            height=dp(24),
         )
-        self.add_widget(self._title_lbl)
+        col.add_widget(self._title_lbl)
 
         self._subtitle_lbl = Label(
             text=subtitle,
-            font_size=sp(12),
+            font_size=sp(14),
             color=get_color_from_hex("#6B7280"),
             halign="left",
             valign="top",
-            text_size=(None, None),
+            size_hint_y=None,
+            height=dp(20),
         )
-        self.add_widget(self._subtitle_lbl)
+        col.add_widget(self._subtitle_lbl)
 
-        self._chips = []
+        chips_row = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=dp(30),
+            spacing=dp(6),
+        )
         for c in chips:
-            chip = ChipBadge(text=c)
-            self._chips.append(chip)
-            self.add_widget(chip)
+            chips_row.add_widget(ChipBadge(text=c))
+        col.add_widget(chips_row)
+
+        self.add_widget(col)
+
+        self.add_widget(Widget(size_hint_x=None, width=dp(8)))
 
         self._arrow = Button(
             text=">",
             size_hint=(None, None),
-            size=(dp(42), dp(42)),
+            size=(dp(38), dp(38)),
             background_normal="",
             background_color=get_color_from_hex("#FFFFFF"),
             color=get_color_from_hex("#6B7280"),
@@ -100,7 +120,6 @@ class AreaCard(Widget):
             self._arrow.bind(on_press=lambda *a: self._go())
 
         self.bind(pos=self._draw, size=self._draw)
-        self.bind(pos=self._layout, size=self._layout)
 
     def _go(self):
         from kivy.app import App
@@ -113,32 +132,8 @@ class AreaCard(Widget):
             RoundedRectangle(pos=(self.x + dp(2), self.y - dp(3)), size=self.size, radius=[dp(22)])
             Color(0, 0, 0, 0.03)
             RoundedRectangle(pos=(self.x + dp(1), self.y - dp(1)), size=self.size, radius=[dp(22)])
-            Color(*self._bg)
+            Color(*self._bg_color)
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(22)])
-
-    def _layout(self, *a):
-        x, y, w, h = self.x, self.y, self.width, self.height
-        pad = dp(20)
-
-        self._img.pos = (x + pad, y + h / 2 - dp(36))
-
-        tx = x + dp(104)
-        tw = w - dp(160)
-
-        self._title_lbl.pos = (tx, y + h - dp(56))
-        self._title_lbl.text_size = (tw, None)
-        self._title_lbl.halign = "left"
-
-        self._subtitle_lbl.pos = (tx, y + h - dp(76))
-        self._subtitle_lbl.text_size = (tw, None)
-        self._subtitle_lbl.halign = "left"
-
-        chip_x = tx
-        chip_y = y + dp(16)
-        for i, chip in enumerate(self._chips):
-            chip.pos = (chip_x + i * dp(78), chip_y)
-
-        self._arrow.pos = (x + w - dp(62), y + h / 2 - dp(21))
 
 
 class ApneaCard(AreaCard):
