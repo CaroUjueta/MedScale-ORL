@@ -78,6 +78,7 @@ class AreaCard(BoxLayout):
             size_hint_y=None,
             height=dp(24),
         )
+        self._title_lbl.bind(size=self._set_text_size)
         col.add_widget(self._title_lbl)
 
         self._subtitle_lbl = Label(
@@ -89,6 +90,7 @@ class AreaCard(BoxLayout):
             size_hint_y=None,
             height=dp(20),
         )
+        self._subtitle_lbl.bind(size=self._set_text_size)
         col.add_widget(self._subtitle_lbl)
 
         chips_row = BoxLayout(
@@ -125,6 +127,10 @@ class AreaCard(BoxLayout):
         from kivy.app import App
         App.get_running_app().root.current = self._target
 
+    @staticmethod
+    def _set_text_size(label, size):
+        label.text_size = (size[0], None)
+
     def _draw(self, *a):
         self.canvas.before.clear()
         with self.canvas.before:
@@ -139,7 +145,7 @@ class AreaCard(BoxLayout):
 class ApneaCard(AreaCard):
     def __init__(self, **kwargs):
         super().__init__(
-            title="Apnea Obstructiva del Sueno",
+            title="Apnea Obstructiva del Sueño",
             subtitle="Evaluacion y tamizaje",
             chips=["ESS", "STOP-BANG", "IMC"],
             bg_color=get_color_from_hex("#EDF5FF"),
