@@ -50,7 +50,7 @@ class HomeScreen(Screen):
 
         content.add_widget(Widget(size_hint_y=None, height=dp(28)))
 
-        content.add_widget(self._section_title("Explora por área"))
+        content.add_widget(self._section_title("Explora por area"))
         content.add_widget(Widget(size_hint_y=None, height=dp(20)))
 
         content.add_widget(ApneaCard())
@@ -103,9 +103,7 @@ class HomeScreen(Screen):
             halign="left",
             valign="middle",
             size_hint_x=1,
-            padding=[dp(8), 0],
         )
-        lbl.bind(size=lambda s, sz: setattr(s, 'text_size', (sz[0], None)))
         row.add_widget(lbl)
         return row
 
@@ -118,15 +116,15 @@ class HomeScreen(Screen):
         grid.bind(minimum_height=grid.setter("height"))
 
         actions = [
-            ("Favoritos", "Escalas guardadas", "favoritos.png"),
-            ("Recientes", "Ultimas escalas", "recientes.png"),
-            ("Pacientes", "Registro y seguimiento", "pacientes.png"),
-            ("Guias rapidas", "Algoritmos y recom.", "guia.png"),
+            ("Favoritos", "Escalas guardadas"),
+            ("Recientes", "Ultimas escalas"),
+            ("Pacientes", "Registro y seguimiento"),
+            ("Guias rapidas", "Algoritmos y recom."),
         ]
 
         cards = []
-        for title, desc, icon in actions:
-            card = QuickActionCard(title=title, description=desc, icon=icon)
+        for title, desc in actions:
+            card = QuickActionCard(title=title, description=desc)
             cards.append(card)
             grid.add_widget(card)
 

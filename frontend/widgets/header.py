@@ -9,8 +9,8 @@ from kivy.graphics import Color, Rectangle, Ellipse
 _CWD = os.path.dirname(os.path.abspath(__file__))
 _IMG = os.path.join(_CWD, "..", "assets")
 
-C_DARK = get_color_from_hex("#033242")
-C_LIGHT = get_color_from_hex("#033242")
+C_DARK = get_color_from_hex("#0A4C5A")
+C_LIGHT = get_color_from_hex("#146A73")
 C_WHITE = get_color_from_hex("#FFFFFF")
 C_W70 = (1, 1, 1, 0.7)
 
@@ -24,7 +24,7 @@ class HomeHeader(Widget):
         self._img_left = KivyImage(
             source=os.path.join(_IMG, "Inicio.png"),
             size_hint=(None, None),
-            size=(dp(150), dp(150)),
+            size=(dp(130), dp(130)),
             allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
@@ -38,71 +38,25 @@ class HomeHeader(Widget):
             fit_mode="contain",
         )
 
-        icon_size = dp(30)
-        self._icon_menu = KivyImage(
-            source=os.path.join(_IMG, "menu.png"),
-            size_hint=(None, None),
-            size=(icon_size, icon_size),
-            allow_stretch=False,
-            keep_ratio=True,
-            fit_mode="contain",
-        )
-        self._icon_buscar = KivyImage(
-            source=os.path.join(_IMG, "buscar.png"),
-            size_hint=(None, None),
-            size=(icon_size, icon_size),
-            allow_stretch=False,
-            keep_ratio=True,
-            fit_mode="contain",
-        )
-        self._icon_campana = KivyImage(
-            source=os.path.join(_IMG, "campana.png"),
-            size_hint=(None, None),
-            size=(icon_size, icon_size),
-            allow_stretch=False,
-            keep_ratio=True,
-            fit_mode="contain",
-        )
-
-        for icon in [self._icon_menu, self._icon_buscar, self._icon_campana]:
-            self.add_widget(icon)
-
         self._greeting = Label(
-            text="¡Hola, Doctor(a)",
-            font_size=sp(34),
-            bold=True,
-            color=C_WHITE,
-            halign="left",
-            valign="bottom",
-            size_hint=(None, None),
-            text_size=(None, None),
-        )
-        self._bang = Label(
-            text="!",
+            text="Hola, Doctor(a)!",
             font_size=sp(34),
             bold=True,
             color=C_WHITE,
             halign="center",
             valign="bottom",
-            size_hint=(None, None),
             text_size=(None, None),
         )
-        self._measure = Label(
-            text="¡Hola, Doctor(a)",
-            font_size=sp(34),
-            bold=True,
-            size_hint=(None, None),
-        )
         self._subtitle = Label(
-            text="Herramientas clinicas basadas en\nevidencias para Otorrinolaringologia",
+            text="Herramientas clinicas basadas en\nevidencia para Otorrinolaringologia",
             font_size=sp(18),
             color=C_W70,
-            halign="left",
+            halign="center",
             valign="top",
             text_size=(None, None),
         )
 
-        for w in [self._img_left, self._img_right, self._greeting, self._bang, self._subtitle]:
+        for w in [self._img_left, self._img_right, self._greeting, self._subtitle]:
             self.add_widget(w)
 
         self.bind(pos=self._layout, size=self._layout)
@@ -112,37 +66,18 @@ class HomeHeader(Widget):
         x, y, w, h = self.x, self.y, self.width, self.height
         pad = dp(20)
 
-        self._img_left.pos = (x + pad, y + h / 2 - dp(75))
+        col_w = (w - pad * 2) / 3
 
-        text_x = x + pad + dp(150) + dp(16)
-        text_w = w - text_x - pad
+        self._img_left.pos = (x + pad, y + h / 2 - dp(65))
 
-        self._greeting.pos = (text_x, y + h - dp(130))
-        self._greeting.size = (text_w, dp(50))
-        self._greeting.text_size = (text_w, None)
+        center_x = x + col_w + col_w / 2
+        self._greeting.pos = (center_x - col_w / 2, y + h - dp(130))
+        self._greeting.text_size = (col_w - dp(16), None)
 
-        self._measure.texture_update()
-        self._bang.texture_update()
-        self._bang.pos = (text_x + self._measure.texture_size[0], y + h - dp(130))
-        self._bang.size = (self._bang.texture_size[0] + dp(4), dp(50))
-
-        self._subtitle.pos = (text_x, y + dp(72))
-        self._subtitle.size = (text_w, dp(60))
-        self._subtitle.text_size = (text_w, None)
+        self._subtitle.pos = (center_x - col_w / 2, y + dp(40))
+        self._subtitle.text_size = (col_w - dp(16), None)
 
         self._img_right.pos = (x + w - dp(150) - pad, y + h / 2 - dp(75))
-
-        top_pad = dp(24)
-        icon_size = dp(30)
-        self._icon_menu.pos = (x + pad, y + h - top_pad - icon_size)
-        self._icon_buscar.pos = (
-            x + w - pad - icon_size * 2 - dp(12),
-            y + h - top_pad - icon_size,
-        )
-        self._icon_campana.pos = (
-            x + w - pad - icon_size,
-            y + h - top_pad - icon_size,
-        )
 
     def _draw(self, *a):
         self.canvas.before.clear()
