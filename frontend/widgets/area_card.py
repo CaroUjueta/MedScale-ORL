@@ -330,6 +330,13 @@ _VIA_AEREA_COLUMNS = [
         ],
     },
     {
+        "titulo": "Deglución",
+        "desc": "Escalas de deglución",
+        "chips": [
+            ("EAT-10", None),
+        ],
+    },
+    {
         "titulo": "Apnea",
         "desc": "Evaluación del sueño",
         "chips": [

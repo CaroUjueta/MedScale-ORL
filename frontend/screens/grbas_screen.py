@@ -1,19 +1,19 @@
 from frontend.screens.base import ScaleScreen
 
 OPTS = [
-    "Ausente (0)",
+    "Normal (0)",
     "Leve (1)",
     "Moderado (2)",
-    "Severo (3)",
+    "Severo/Extremo (3)",
 ]
 VALS = [0, 1, 2, 3]
 
 QS = [
-    "G - Grado de disfonia",
-    "R - Aspereza",
-    "B - Soplosidad",
-    "A - Astenia (voz debil)",
-    "S - Tension (voz forzada)",
+    "G - Grado: grado global de la alteracion vocal o disfonia",
+    "R - Ronquera: importancia de la ronquera y aspereza",
+    "A - Astenia: grado de astenia o fatiga vocal",
+    "B - Soplosidad: voz aerea, caracter soplado o velado",
+    "S - Tension: grado de tension, constrenimiento o dureza",
 ]
 
 
@@ -46,4 +46,4 @@ class GrbasScreen(ScaleScreen):
         total = sum(c._option_state["score"] for c in self._cards)
         interp = _interpretar_grbas(total)
         per = "  ".join(str(c._option_state["score"]) for c in self._cards)
-        self._result_lbl.text = f"{self.result_prefix} {total}\nG-R-B-A-S: {per}\n{interp}"
+        self._result_lbl.text = f"{self.result_prefix} {total}\nG-R-A-B-S: {per}\n{interp}"
