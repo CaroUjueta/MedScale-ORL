@@ -45,7 +45,7 @@ class AreaCard(BoxLayout):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
         self.size_hint_y = None
-        self.height = dp(116)
+        self.height = dp(140)
         self.padding = [dp(14), dp(14), dp(14), dp(14)]
         self._bg_color = bg_color
         self._target = target
@@ -53,7 +53,7 @@ class AreaCard(BoxLayout):
         self._img = KivyImage(
             source=os.path.join(_IMG, img_name),
             size_hint=(None, None),
-            size=(dp(86), dp(86)),
+            size=(dp(110), dp(110)),
             allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
