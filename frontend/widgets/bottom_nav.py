@@ -92,3 +92,15 @@ class BottomNavigation(Widget):
         for i, lbl in enumerate(self._labels):
             lbl.pos = (item_w * i, self.y + dp(8))
             lbl.text_size = (item_w, None)
+
+    def on_touch_down(self, touch):
+        if not self.collide_point(*touch.pos):
+            return False
+        item_w = self.width / len(self._items)
+        idx = int((touch.x - self.x) // item_w)
+        if 0 <= idx < len(self._items):
+            _, target = self._items[idx]
+            self.set_active(idx)
+            from kivy.app import App
+            App.get_running_app().root.current = target
+        return True

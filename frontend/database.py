@@ -45,6 +45,16 @@ def init_db():
             clave  TEXT PRIMARY KEY,
             valor  TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS favoritos (
+            escala  TEXT PRIMARY KEY,
+            fecha   TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS recientes (
+            escala  TEXT PRIMARY KEY,
+            fecha   TEXT NOT NULL
+        );
     """)
     _ensure_default_config(conn)
     conn.commit()
@@ -172,3 +182,53 @@ def actualizar_config(clave, valor):
     )
     conn.commit()
     conn.close()
+
+
+def es_favorita(escala):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM favoritos WHERE escala=?", (escala,)
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def agregar_favorita(escala):
+    conn = get_conn()
+    conn.execute(
+        "INSERT OR IGNORE INTO favoritos (escala, fecha) VALUES (?, ?)",
+        (escala, datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def quitar_favorita(escala):
+    conn = get_conn()
+    conn.execute("DELETE FROM favoritos WHERE escala=?", (escala,))
+    conn.commit()
+    conn.close()
+
+
+def obtener_favoritas():
+    conn = get_conn()
+    rows = conn.execute("SELECT escala FROM favoritos ORDER BY fecha DESC").fetchall()
+    conn.close()
+    return [r["escala"] for r in rows]
+
+
+def registrar_uso_escala(escala):
+    conn = get_conn()
+    conn.execute(
+        "INSERT OR REPLACE INTO recientes (escala, fecha) VALUES (?, ?)",
+        (escala, datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def obtener_recientes():
+    conn = get_conn()
+    rows = conn.execute("SELECT * FROM recientes ORDER BY fecha DESC").fetchall()
+    conn.close()
+    return [dict(r) for r in rows]

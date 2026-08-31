@@ -11,7 +11,7 @@ from kivy.metrics import dp, sp
 from kivy.graphics import Color, Rectangle
 
 from frontend.widgets.header import HomeHeader
-from frontend.widgets.area_card import ApneaCard, RinosinusitisCard, OtologiaCard
+from frontend.widgets.area_card import ViaAereaCard, RinosinusitisCard, OtologiaCard
 from frontend.widgets.quick_action_card import QuickActionCard
 from frontend.widgets.info_banner import EvidenceBanner
 from frontend.widgets.bottom_nav import BottomNavigation
@@ -53,7 +53,7 @@ class HomeScreen(Screen):
         content.add_widget(self._section_title("Explora por área"))
         content.add_widget(Widget(size_hint_y=None, height=dp(20)))
 
-        content.add_widget(ApneaCard())
+        content.add_widget(ViaAereaCard())
         content.add_widget(Widget(size_hint_y=None, height=dp(20)))
         content.add_widget(RinosinusitisCard())
         content.add_widget(Widget(size_hint_y=None, height=dp(20)))
@@ -111,22 +111,22 @@ class HomeScreen(Screen):
 
     def _build_quick_grid(self):
         grid = GridLayout(
-            cols=2,
-            spacing=dp(16),
+            cols=4,
+            spacing=dp(12),
             size_hint_y=None,
         )
         grid.bind(minimum_height=grid.setter("height"))
 
         actions = [
-            ("Favoritos", "Escalas guardadas", "favoritos.png"),
-            ("Recientes", "Ultimas escalas", "recientes.png"),
-            ("Pacientes", "Registro y seguimiento", "pacientes.png"),
-            ("Guias rapidas", "Algoritmos y recom.", "guia.png"),
+            ("favoritos.png", "favoritos"),
+            ("recientes.png", "recientes"),
+            ("pacientes.png", "patient_list"),
+            ("guia.png", "guias"),
         ]
 
         cards = []
-        for title, desc, icon in actions:
-            card = QuickActionCard(title=title, description=desc, icon=icon)
+        for icon, target in actions:
+            card = QuickActionCard(source=icon, target=target)
             cards.append(card)
             grid.add_widget(card)
 
@@ -135,10 +135,20 @@ class HomeScreen(Screen):
             if w < 1:
                 Clock.schedule_once(_size_cards, 0.05)
                 return
-            card_w = (w - dp(16)) / 2.0
-            card_h = card_w / 1.3
+            last = getattr(_size_cards, "last", 0.0)
+            card_w = (w - dp(12) * 3) / 4.0
+            h = 0
             for c in cards:
-                c.height = card_h
+                if c.aspect <= 0:
+                    Clock.schedule_once(_size_cards, 0.05)
+                    return
+                c.size = (card_w, card_w / c.aspect)
+                h = max(h, c.height)
+            for c in cards:
+                c.height = h
+            if abs(w - last) > 1:
+                _size_cards.last = w
+                Clock.schedule_once(_size_cards, 0.05)
 
         Clock.schedule_once(_size_cards, 0.1)
 
