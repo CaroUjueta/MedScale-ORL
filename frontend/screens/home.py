@@ -54,9 +54,9 @@ class HomeScreen(Screen):
         content.add_widget(Widget(size_hint_y=None, height=dp(20)))
 
         content.add_widget(ViaAereaCard())
-        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+        content.add_widget(Widget(size_hint_y=None, height=dp(8)))
         content.add_widget(RinosinusitisCard())
-        content.add_widget(Widget(size_hint_y=None, height=dp(20)))
+        content.add_widget(Widget(size_hint_y=None, height=dp(8)))
         content.add_widget(OtologiaCard())
 
         content.add_widget(Widget(size_hint_y=None, height=dp(28)))

@@ -77,12 +77,19 @@ class BottomNavigation(Widget):
 
     def _layout(self, *a):
         item_w = self.width / len(self._items)
+        icon_h = dp(28)
+        gap = dp(4)
+        text_h = dp(20)
+        block_h = icon_h + gap + text_h
+        top_base = self.y + (self.height - block_h) / 2
         for i, (text, target, gris, azul) in enumerate(self._items):
+            item_x = self.x + item_w * i
             cx = self.x + item_w * i + item_w / 2
             icon = self._icons[i]
-            icon.center = (cx, self.y + self.height - dp(40))
-            self._labels[i].pos = (item_w * i, self.y + dp(8))
-            self._labels[i].text_size = (item_w, None)
+            icon.center = (cx, top_base + block_h - icon_h / 2)
+            self._labels[i].pos = (item_x, top_base)
+            self._labels[i].size = (item_w, text_h)
+            self._labels[i].text_size = (item_w, text_h)
 
     def on_touch_down(self, touch):
         if not self.collide_point(*touch.pos):

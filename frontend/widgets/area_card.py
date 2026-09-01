@@ -14,6 +14,21 @@ _CWD = os.path.dirname(os.path.abspath(__file__))
 _IMG = os.path.join(_CWD, "..", "assets")
 
 
+def _shade(color, factor):
+    """Return `color` with its RGB channels scaled by `factor` (kept opaque)."""
+    return (color[0] * factor, color[1] * factor, color[2] * factor, 1)
+
+
+def _mix(a, b, t):
+    """Blend color `a` toward color `b` by `t` (0..1), kept opaque."""
+    return (
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t,
+        1,
+    )
+
+
 class ChipBadge(Widget):
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
@@ -42,33 +57,104 @@ class ChipBadge(Widget):
             Line(rounded_rectangle=(self.x, self.y, self.width, self.height, dp(15)), width=dp(0.8))
 
 
+class PillBadge(ButtonBehavior, Widget):
+    """Auto-width chip (white pill, blue border). Opens a scale screen when it has a target."""
+
+    def __init__(self, text, target=None, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (None, None)
+        self.size = (dp(72), dp(26))
+        self.target = target
+        self._lbl = Label(
+            text=text,
+            font_size=sp(13),
+            color=get_color_from_hex("#2563EB"),
+            halign="center",
+            valign="middle",
+            pos=self.pos,
+            size=self.size,
+        )
+        self.add_widget(self._lbl)
+        self.bind(pos=self._sync, size=self._sync)
+        Clock.schedule_once(self._measure)
+
+    def _sync(self, *a):
+        self._lbl.pos = self.pos
+        self._lbl.size = self.size
+        self._draw()
+
+    def _measure(self, _dt):
+        self._lbl.texture_update()
+        tw = self._lbl.texture_size[0]
+        if tw < 1:
+            Clock.schedule_once(self._measure, 0.02)
+            return
+        self.width = tw + dp(18)
+        self._sync()
+
+    def _draw(self, *a):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(1, 1, 1, 0.85)
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(13)])
+            Color(0.82, 0.87, 0.96, 1)
+            Line(
+                rounded_rectangle=(self.x, self.y, self.width, self.height, dp(13)),
+                width=dp(0.8),
+            )
+
+    def on_release(self):
+        if not self.target:
+            return
+        from kivy.app import App
+        app = App.get_running_app()
+        if app is not None and app.root is not None:
+            app.root.current = self.target
+
+
 class AreaCard(BoxLayout):
-    def __init__(self, title, subtitle, chips, bg_color, img_name, area=None, **kwargs):
+    def __init__(self, title, subtitle, chips, bg_color, img_name, area=None,
+                 img_tint=None, icon_disk=False, disk_tint=None,
+                 icon_size=110, disk_size=None, pad_left=14, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
         self.size_hint_y = None
         self.height = dp(140)
-        self.padding = [dp(14), dp(14), dp(14), dp(14)]
+        self.padding = [dp(pad_left), dp(14), dp(14), dp(14)]
         self._bg_color = bg_color
         self._area = area
+        self._icon_disk = bool(icon_disk)
+        self._disk_size = dp(disk_size if disk_size is not None else icon_size)
+        # Disk behind the icon: same hue as the card, just a little deeper. When
+        # `disk_tint` is given the base is nudged toward it so it stays coordinated.
+        base = bg_color if disk_tint is None else _mix(bg_color, disk_tint, 0.18)
+        self._disk_fill = _shade(base, 0.98 if disk_tint is not None else 0.93)
+        self._disk_ring = _shade(base, 0.84)
 
         self._img = KivyImage(
             source=os.path.join(_IMG, img_name),
             size_hint=(None, None),
-            size=(dp(110), dp(110)),
+            size=(dp(icon_size), dp(icon_size)),
             allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
+            pos_hint={"center_y": 0.5},
         )
+        if img_tint is not None:
+            self._img.color = img_tint
         self.add_widget(self._img)
+        if icon_disk:
+            self._img.bind(pos=self._draw, size=self._draw)
 
-        self.add_widget(Widget(size_hint_x=None, width=dp(10)))
+        self.add_widget(Widget(size_hint_x=None, width=dp(pad_left)))
 
         col = BoxLayout(
             orientation="vertical",
             size_hint_x=1,
             spacing=dp(2),
         )
+
+        col.add_widget(Widget())
 
         self._title_lbl = Label(
             text=title.upper(),
@@ -104,6 +190,8 @@ class AreaCard(BoxLayout):
         for c in chips:
             chips_row.add_widget(ChipBadge(text=c))
         col.add_widget(chips_row)
+
+        col.add_widget(Widget())
 
         self.add_widget(col)
 
@@ -147,6 +235,14 @@ class AreaCard(BoxLayout):
             Color(*self._bg_color)
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(22)])
 
+            if self._icon_disk:
+                d = self._disk_size
+                cx, cy = self._img.center
+                Color(*self._disk_fill)
+                Ellipse(pos=(cx - d / 2, cy - d / 2), size=(d, d))
+                Color(*self._disk_ring)
+                Line(circle=(cx, cy, d / 2), width=dp(1))
+
 
 class ApneaCard(AreaCard):
     def __init__(self, **kwargs):
@@ -164,389 +260,192 @@ class ApneaCard(AreaCard):
 class RinosinusitisCard(AreaCard):
     def __init__(self, **kwargs):
         super().__init__(
-            title="Rinosinusitis",
-            subtitle="Sintomas y evaluacion",
+            title="Rinología",
+            subtitle="Rinosinusitis",
             chips=["SNOT-22", "Lund Mackay"],
             bg_color=get_color_from_hex("#EEF9F1"),
             img_name="Rinosinusitis.png",
             area="rinosinusitis",
+            icon_size=96,
+            disk_size=96,
+            icon_disk=True,
+            disk_tint=get_color_from_hex("#10B981"),
+            pad_left=12,
             **kwargs,
         )
 
 
-class OtologiaCard(AreaCard):
-    def __init__(self, **kwargs):
-        super().__init__(
-            title="Otologia",
-            subtitle="Audicion y funcion del oido",
-            chips=["THI", "ETDQ-7"],
-            bg_color=get_color_from_hex("#F3ECFF"),
-            img_name="Otología.png",
-            area="otologia",
-            **kwargs,
-        )
-
-
-def _navigate(screen_name):
-    from kivy.app import App
-    app = App.get_running_app()
-    if app is not None and app.root is not None:
-        app.root.current = screen_name
-
-
-class PillBadge(ButtonBehavior, Widget):
-    def __init__(self, text, target=None, disabled=False, **kwargs):
-        super().__init__(**kwargs)
-        self.size_hint = (None, None)
-        self.size = (dp(96), dp(26))
-        self.target = target
-        self.disabled = disabled
-        self._active_color = get_color_from_hex("#2563EB")
-        self._lbl = Label(
-            text=text,
-            font_size=sp(12),
-            color=get_color_from_hex("#9CA3AF") if disabled else get_color_from_hex("#1F2937"),
-            halign="center",
-            valign="middle",
-            pos=self.pos,
-            size=self.size,
-        )
-        self.add_widget(self._lbl)
-        self.bind(pos=self._draw, size=self._draw)
-        self.bind(pos=lambda s, p: setattr(s._lbl, 'pos', p))
-        self.bind(size=lambda s, sz: setattr(s._lbl, 'size', sz))
-        Clock.schedule_once(self._measure)
-
-    def _measure(self, _dt):
-        self._lbl.texture_update()
-        tw = self._lbl.texture_size[0]
-        if tw < 1:
-            Clock.schedule_once(self._measure, 0.02)
-            return
-        self.width = tw + dp(18)
-
-    def _draw(self, *a):
-        self.canvas.before.clear()
-        with self.canvas.before:
-            Color(0.94, 0.94, 0.96, 1)
-            RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(13)])
-            Color(0, 0, 0, 0.08)
-            Line(
-                rounded_rectangle=(self.x, self.y, self.width, self.height, dp(13)),
-                width=dp(0.6),
-            )
-
-    def on_press(self):
-        if self.disabled:
-            return
-        self._lbl.color = self._active_color
-
-    def on_release(self):
-        if self.disabled or not self.target:
-            return
-        self._lbl.color = get_color_from_hex("#1F2937")
-        _navigate(self.target)
-
-    def on_touch_down(self, touch):
-        if not self.collide_point(*touch.pos):
-            return False
-        if not self.disabled:
-            ButtonBehavior.on_touch_down(self, touch)
-        return True
-
-    def on_touch_up(self, touch):
-        if not self.collide_point(*touch.pos):
-            return False
-        if not self.disabled:
-            ButtonBehavior.on_touch_up(self, touch)
-        return True
-
-
-class AirwayIcon(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.size_hint = (None, None)
-        self.size = (dp(56), dp(56))
-        self.bind(pos=self._draw, size=self._draw)
-
-    @staticmethod
-    def _profile():
-        return [
-            (0.36, 0.84), (0.33, 0.70), (0.26, 0.62), (0.21, 0.56),
-            (0.18, 0.52), (0.16, 0.47), (0.19, 0.45), (0.15, 0.41),
-            (0.21, 0.37), (0.27, 0.28), (0.33, 0.17), (0.45, 0.14),
-            (0.58, 0.16), (0.71, 0.31), (0.73, 0.50), (0.62, 0.74),
-            (0.60, 0.84),
-        ]
-
-    def _draw(self, *a):
-        x, y, s = self.x, self.y, self.width
-        self.canvas.before.clear()
-        with self.canvas.before:
-            Color(0.91, 0.94, 0.996, 1)
-            Ellipse(pos=(x, y), size=(s, s))
-
-        self.canvas.clear()
-        with self.canvas:
-            pts = []
-            for px, py in self._profile():
-                pts.append(x + px * s)
-                pts.append(y + py * s)
-
-            for w in (dp(7), dp(5), dp(4), dp(3)):
-                Color(0.075, 0.243, 0.486, 1)
-                Line(points=pts, width=w, close=True, joint="round", cap="round")
-
-            Color(0.16, 0.62, 0.56, 1)
-            Line(
-                points=[
-                    x + 0.265 * s, y + 0.46 * s,
-                    x + 0.275 * s, y + 0.60 * s,
-                    x + 0.295 * s, y + 0.71 * s,
-                    x + 0.325 * s, y + 0.82 * s,
-                ],
-                width=dp(3.4),
-                cap="round",
-            )
-            rings = [
-                ((0.255, 0.58), (0.305, 0.58)),
-                ((0.275, 0.68), (0.318, 0.68)),
-                ((0.295, 0.77), (0.335, 0.77)),
-            ]
-            for (ax, ay), (bx, by) in rings:
-                Line(
-                    points=[x + ax * s, y + ay * s, x + bx * s, y + by * s],
-                    width=dp(0.8),
-                )
+_OTOLOGIA_COLUMNS = [
+    {
+        "titulo": "Tinnitus",
+        "desc": "gravedad del acúfeno",
+        "tests": [("THI", "thi")],
+        "width": 160,
+    },
+    {
+        "titulo": "Disfunción tubárica",
+        "desc": "Función tubárica",
+        "tests": [("ETDQ-7", "etdq7")],
+        "width": 230,
+    },
+]
 
 
 _VIA_AEREA_COLUMNS = [
     {
         "titulo": "Disfonía",
         "desc": "Evaluación de la voz",
-        "chips": [
-            ("VHI-10", "vhi10"),
-            ("GRBAS", "grbas"),
-        ],
-    },
-    {
-        "titulo": "Deglución",
-        "desc": "Escalas de deglución",
-        "chips": [
-            ("EAT-10", None),
-        ],
+        "tests": [("VHI-10", "vhi10"), ("GRBAS", "grbas")],
+        "width": 150,
     },
     {
         "titulo": "Apnea",
         "desc": "Evaluación del sueño",
-        "chips": [
-            ("Epworth (ESS)", "ess"),
-            ("STOP-BANG", "stop_bang"),
-            ("IMC", "imc"),
-        ],
+        "tests": [("ESS", "ess"), ("STOP-BANG", "stop_bang"), ("IMC", "imc")],
+        "width": 220,
     },
 ]
 
-_C_TITLE = get_color_from_hex("#1F2937")
-_C_DESC = get_color_from_hex("#6B7280")
-_C_NAVY = get_color_from_hex("#133E7C")
-
-
-class ChevronButton(ButtonBehavior, Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.size_hint = (None, None)
-        self.size = (dp(38), dp(38))
-        self.point_down = True
-        self.bind(pos=self._draw, size=self._draw)
-
-    def set_expanded(self, expanded):
-        self.point_down = bool(expanded)
-        self._draw()
-
-    def _draw(self, *a):
-        c = self.canvas.before
-        c.clear()
-        x, y, w, h = self.x, self.y, self.width, self.height
-        cx, cy = x + w / 2, y + h / 2
-        with c:
-            Color(0.95, 0.96, 0.97, 1)
-            Ellipse(pos=(x, y), size=(w, h))
-            Color(0.33, 0.36, 0.39, 1)
-            if self.point_down:
-                Line(
-                    points=[cx - dp(6), cy, cx, cy + dp(7), cx + dp(6), cy],
-                    width=dp(2),
-                    joint="round",
-                    cap="round",
-                )
-            else:
-                Line(
-                    points=[cx, cy + dp(6), cx + dp(7), cy, cx, cy - dp(6)],
-                    width=dp(2),
-                    joint="round",
-                    cap="round",
-                )
-
 
 class ViaAereaCard(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, title="VÍA AÉREA", bg="#EDF5FF", disk_tint="#2563EB",
+                 img_name="Inicio.png", columns=None, area=None,
+                 icon_tint="#2563EB", **kwargs):
         super().__init__(**kwargs)
-        self.orientation = "vertical"
+        self.orientation = "horizontal"
         self.size_hint_y = None
-        self.padding = [dp(14), dp(12), dp(14), dp(12)]
-        self.spacing = dp(8)
-        self._expanded = True
-        self._mode = "narrow"
-        self._bg_color = get_color_from_hex("#FFFFFF")
+        self.height = dp(140)
+        self.padding = [dp(12), dp(12), dp(12), dp(12)]
+        self.spacing = dp(12)
+        self._area = area
 
-        self.bind(minimum_height=self.setter("height"))
-        self.bind(pos=self._draw, size=self._draw)
+        bg = get_color_from_hex(bg)
+        self._bg_color = bg
+        base = _mix(bg, get_color_from_hex(disk_tint), 0.10)
+        self._disk_fill = _shade(base, 0.99)
+        self._disk_ring = _shade(base, 0.70)
 
-        header = BoxLayout(
-            orientation="horizontal",
-            size_hint_y=None,
-            height=dp(56),
-            spacing=dp(12),
+        self._img = KivyImage(
+            source=os.path.join(_IMG, img_name),
+            size_hint=(None, None),
+            size=(dp(96), dp(96)),
+            allow_stretch=False,
+            keep_ratio=True,
+            fit_mode="contain",
+            color=get_color_from_hex(icon_tint),
+            pos_hint={"center_y": 0.5},
         )
-        header.add_widget(AirwayIcon())
+        self.add_widget(self._img)
+        self._img.bind(pos=self._draw, size=self._draw)
 
-        title = Label(
-            text="VÍA AÉREA",
+        content = BoxLayout(
+            orientation="vertical",
+            size_hint_x=1,
+            spacing=dp(4),
+        )
+
+        self._title_lbl = Label(
+            text=title,
             font_size=sp(18),
             bold=True,
-            color=_C_NAVY,
+            color=get_color_from_hex("#133E7C"),
             halign="left",
             valign="middle",
-            size_hint_x=1,
-        )
-        title.bind(size=lambda s, sz: setattr(s, "text_size", (sz[0], None)))
-        header.add_widget(title)
-
-        self._arrow = ChevronButton()
-        self._arrow.bind(on_press=lambda *_: self._toggle())
-        header.add_widget(self._arrow)
-        self.add_widget(header)
-
-        self._col_host = BoxLayout(
-            orientation="vertical",
             size_hint_y=None,
+            height=dp(24),
         )
-        self._col_host.bind(minimum_height=self._sync_col_host)
-        self._col_host.height = 0
-        self.add_widget(self._col_host)
+        self._title_lbl.bind(size=lambda s, sz: setattr(s, "text_size", (sz[0], None)))
+        content.add_widget(self._title_lbl)
 
-        self._build_columns()
-        self.bind(size=self._apply_responsive)
+        cols_row = BoxLayout(orientation="horizontal", size_hint_y=1, spacing=dp(24))
+        for col in (columns or _VIA_AEREA_COLUMNS):
+            cols_row.add_widget(self._build_column(col))
+        content.add_widget(cols_row)
 
-    def _sync_col_host(self, *a):
-        if self._expanded:
-            Clock.schedule_once(self._apply_col_height, -1)
-        else:
-            self._col_host.height = 0
+        self.add_widget(content)
 
-    def _apply_col_height(self, *_a):
-        self._col_host.height = 0 if not self._expanded else self._col_host.minimum_height
+        self._arrow = Button(
+            text=">",
+            size_hint=(None, None),
+            size=(dp(34), dp(34)),
+            background_normal="",
+            background_color=get_color_from_hex("#FFFFFF"),
+            color=get_color_from_hex("#6B7280"),
+            font_size=sp(18),
+            bold=True,
+            pos_hint={"center_y": 0.5},
+        )
+        self._arrow.bind(on_press=lambda *a: self._go())
+        self.add_widget(self._arrow)
 
-    def _build_columns(self):
-        self._col_host.clear_widgets()
-        inner = self.width - self.padding[0] - self.padding[2]
-        self._mode = "wide" if inner >= dp(430) else "narrow"
+        self.bind(pos=self._draw, size=self._draw)
 
-        if self._mode == "wide":
-            container = BoxLayout(
-                orientation="horizontal",
-                size_hint_y=None,
-                spacing=dp(10),
-            )
-            columns = [self._build_column(col) for col in _VIA_AEREA_COLUMNS]
-            max_h = max(c.height for c in columns)
-            for c in columns:
-                c.height = max_h
-                container.add_widget(c)
-        else:
-            container = BoxLayout(
-                orientation="vertical",
-                size_hint_y=None,
-                spacing=dp(8),
-            )
-            for col in _VIA_AEREA_COLUMNS:
-                container.add_widget(self._build_column(col))
-
-        container.bind(minimum_height=container.setter("height"))
-        self._col_host.add_widget(container)
-        if self._expanded:
-            Clock.schedule_once(self._apply_col_height, -1)
-
-    def _build_column(self, col):
+    def _build_column(self, data):
+        # Fixed width per column so each one fits its title and chips while the
+        # cards keep an even look and a moderate gap between the two columns.
         column = BoxLayout(
             orientation="vertical",
-            size_hint_y=None,
-            spacing=dp(6),
+            size_hint_x=None,
+            width=dp(data.get("width", 160)),
+            spacing=dp(1),
         )
 
-        def _left(lbl):
-            lbl.bind(size=lambda s, sz: setattr(s, "text_size", (sz[0], None)))
-            return lbl
+        column.add_widget(Widget(size_hint_y=None, height=dp(0)))
 
-        col_title = _left(Label(
-            text=col["titulo"],
-            font_size=sp(15),
+        title = Label(
+            text=data["titulo"],
+            font_size=sp(14),
             bold=True,
-            color=_C_TITLE,
+            color=get_color_from_hex("#1F2937"),
             halign="left",
             valign="middle",
             size_hint_y=None,
-            height=dp(22),
-        ))
-        column.add_widget(col_title)
+            height=dp(19),
+        )
+        title.bind(size=lambda s, sz: setattr(s, "text_size", (sz[0], None)))
+        column.add_widget(title)
 
-        desc = _left(Label(
-            text=col["desc"],
-            font_size=sp(12),
-            color=_C_DESC,
+        desc = Label(
+            text=data["desc"],
+            font_size=sp(11),
+            color=get_color_from_hex("#6B7280"),
             halign="left",
             valign="middle",
+            shorten=True,
+            shorten_from="right",
             size_hint_y=None,
-            height=dp(18),
-        ))
+            height=dp(15),
+        )
+        desc.bind(width=lambda s, w: setattr(s, "text_size", (w, s.height)))
         column.add_widget(desc)
 
-        stack_h = dp(0)
+        column.add_widget(Widget(size_hint_y=None, height=dp(2)))
+
         chips = BoxLayout(
-            orientation="vertical",
-            size_hint_y=None,
-            spacing=dp(5),
+            orientation="horizontal",
+            size_hint=(None, None),
+            height=dp(26),
+            spacing=dp(2),
         )
-        for text, target in col["chips"]:
-            chips.add_widget(PillBadge(text=text, target=target, disabled=target is None))
-            stack_h += dp(26)
-        if col["chips"]:
-            stack_h += dp(5) * (len(col["chips"]) - 1)
-        chips.height = stack_h
+        chips.bind(minimum_width=chips.setter("width"))
+        for text, target in data["tests"]:
+            chips.add_widget(PillBadge(text=text, target=target))
         column.add_widget(chips)
 
-        column.height = dp(22) + dp(6) + dp(18) + dp(6) + stack_h
+        column.add_widget(Widget())
+
         return column
 
-    def _toggle(self):
-        self._expanded = not self._expanded
-        self._arrow.set_expanded(self._expanded)
-        self._apply_col_height()
-
-    def _apply_responsive(self, *a):
-        inner = self.width - self.padding[0] - self.padding[2]
-        mode = "wide" if inner >= dp(430) else "narrow"
-        if mode != self._mode:
-            self._build_columns()
-
-    def on_touch_down(self, touch):
-        if not self.collide_point(*touch.pos):
-            return False
-        if super().on_touch_down(touch):
-            return True
-        self._toggle()
-        return True
+    def _go(self):
+        from kivy.app import App
+        sm = App.get_running_app().root
+        if sm is None:
+            return
+        try:
+            sm.get_screen("escalas").set_filtro(self._area)
+        except Exception:
+            pass
+        sm.current = "escalas"
 
     def _draw(self, *a):
         self.canvas.before.clear()
@@ -557,3 +456,25 @@ class ViaAereaCard(BoxLayout):
             RoundedRectangle(pos=(self.x + dp(1), self.y - dp(1)), size=self.size, radius=[dp(22)])
             Color(*self._bg_color)
             RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(22)])
+
+            d = dp(96)
+            cx, cy = self._img.center
+            Color(*self._disk_fill)
+            Ellipse(pos=(cx - d / 2, cy - d / 2), size=(d, d))
+            Color(*self._disk_ring)
+            Line(circle=(cx, cy, d / 2), width=dp(1))
+
+
+class OtologiaCard(ViaAereaCard):
+    def __init__(self, **kwargs):
+        super().__init__(
+            title="OTOLOGÍA",
+            bg="#F3ECFF",
+            disk_tint="#7C3AED",
+            icon_tint="#FFFFFF",
+            img_name="Otología.png",
+            columns=_OTOLOGIA_COLUMNS,
+            area="otologia",
+            **kwargs,
+        )
+

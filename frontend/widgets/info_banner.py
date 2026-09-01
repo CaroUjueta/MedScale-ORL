@@ -23,7 +23,7 @@ class EvidenceBanner(BoxLayout):
         self.add_widget(Image(
             source=os.path.join(_IMG, "evidencia.png"),
             size_hint=(None, None),
-            size=(dp(52), dp(52)),
+            size=(dp(72), dp(72)),
             allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
@@ -42,8 +42,11 @@ class EvidenceBanner(BoxLayout):
             color=get_color_from_hex("#0D6E73"),
             halign="left",
             valign="middle",
-            size_hint_y=None,
+            size_hint=(1, None),
             height=dp(26),
+        )
+        self._title_lbl.bind(
+            size=lambda s, sz: setattr(s, "text_size", (sz[0], None))
         )
         col.add_widget(self._title_lbl)
 
@@ -53,8 +56,11 @@ class EvidenceBanner(BoxLayout):
             color=get_color_from_hex("#6B7280"),
             halign="left",
             valign="top",
-            size_hint_y=None,
+            size_hint=(1, None),
             height=dp(40),
+        )
+        self._desc_lbl.bind(
+            size=lambda s, sz: setattr(s, "text_size", (sz[0], None))
         )
         col.add_widget(self._desc_lbl)
 
