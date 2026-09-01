@@ -118,15 +118,20 @@ class HomeScreen(Screen):
         grid.bind(minimum_height=grid.setter("height"))
 
         actions = [
-            ("favoritos.png", "favoritos"),
-            ("recientes.png", "recientes"),
-            ("pacientes.png", "patient_list"),
-            ("guia.png", "guias"),
+            ("favoritos.png", "Favoritos", "Escalas guardadas", "favoritos"),
+            ("recientes.png", "Recientes", "Últimas escalas utilizadas", "recientes"),
+            ("pacientes.png", "Pacientes", "Registro y seguimiento", "patient_list"),
+            ("guia.png", "Guías rápidas", "Algoritmos y recomendaciones", "guias"),
         ]
 
         cards = []
-        for icon, target in actions:
-            card = QuickActionCard(source=icon, target=target)
+        for icon, title, subtitle, target in actions:
+            card = QuickActionCard(
+                source=icon,
+                title=title,
+                subtitle=subtitle,
+                target=target,
+            )
             cards.append(card)
             grid.add_widget(card)
 
@@ -137,15 +142,8 @@ class HomeScreen(Screen):
                 return
             last = getattr(_size_cards, "last", 0.0)
             card_w = (w - dp(12) * 3) / 4.0
-            h = 0
             for c in cards:
-                if c.aspect <= 0:
-                    Clock.schedule_once(_size_cards, 0.05)
-                    return
-                c.size = (card_w, card_w / c.aspect)
-                h = max(h, c.height)
-            for c in cards:
-                c.height = h
+                c.size = (card_w, dp(140))
             if abs(w - last) > 1:
                 _size_cards.last = w
                 Clock.schedule_once(_size_cards, 0.05)
