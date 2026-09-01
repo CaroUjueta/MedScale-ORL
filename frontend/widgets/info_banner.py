@@ -27,6 +27,7 @@ class EvidenceBanner(BoxLayout):
             allow_stretch=False,
             keep_ratio=True,
             fit_mode="contain",
+            pos_hint={"center_y": 0.5},
         ))
 
         col = BoxLayout(
@@ -73,6 +74,7 @@ class EvidenceBanner(BoxLayout):
             color=get_color_from_hex("#14828A"),
             size_hint=(None, None),
             size=(dp(30), dp(30)),
+            pos_hint={"center_y": 0.5},
             halign="center",
             valign="middle",
         )

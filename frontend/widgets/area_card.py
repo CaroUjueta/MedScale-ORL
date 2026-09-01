@@ -201,6 +201,7 @@ class AreaCard(BoxLayout):
             text=">",
             size_hint=(None, None),
             size=(dp(38), dp(38)),
+            pos_hint={"center_y": 0.5},
             background_normal="",
             background_color=get_color_from_hex("#FFFFFF"),
             color=get_color_from_hex("#6B7280"),

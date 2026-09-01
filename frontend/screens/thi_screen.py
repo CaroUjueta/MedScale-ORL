@@ -3,6 +3,19 @@ from frontend.screens.base import ScaleScreen
 OPTS = ["No (0)", "A veces (2)", "Si (4)"]
 VALS = [0, 2, 4]
 
+def _interpretar_thi(puntaje):
+    if puntaje <= 16:
+        return "Sin discapacidad\n(acufeno leve)"
+    elif puntaje <= 36:
+        return "Discapacidad leve"
+    elif puntaje <= 56:
+        return "Discapacidad moderada"
+    elif puntaje <= 76:
+        return "Discapacidad severa"
+    else:
+        return "Discapacidad catastrofica"
+
+
 QS = [
     "¿Le cuesta concentrarse por culpa del ruido o zumbido de oído?",
     "¿Le cuesta escuchar a los demás debido a que el zumbido es muy fuerte?",
@@ -47,4 +60,9 @@ class ThiScreen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_thi(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
+        self._last_puntaje = total
+        self._save_btn_widget.opacity = 1
+        self._save_btn_widget.disabled = False
