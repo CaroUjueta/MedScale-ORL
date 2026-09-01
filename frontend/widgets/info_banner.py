@@ -1,9 +1,14 @@
+import os
+
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.widget import Widget
+from kivy.uix.image import Image
 from kivy.utils import get_color_from_hex
 from kivy.metrics import dp, sp
 from kivy.graphics import Color, RoundedRectangle
+
+_CWD = os.path.dirname(os.path.abspath(__file__))
+_IMG = os.path.join(_CWD, "..", "assets")
 
 
 class EvidenceBanner(BoxLayout):
@@ -15,9 +20,13 @@ class EvidenceBanner(BoxLayout):
         self.padding = [dp(20), dp(16), dp(20), dp(16)]
         self.spacing = dp(16)
 
-        self.add_widget(Widget(
+        self.add_widget(Image(
+            source=os.path.join(_IMG, "evidencia.png"),
             size_hint=(None, None),
             size=(dp(52), dp(52)),
+            allow_stretch=False,
+            keep_ratio=True,
+            fit_mode="contain",
         ))
 
         col = BoxLayout(

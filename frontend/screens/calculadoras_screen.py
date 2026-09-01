@@ -26,7 +26,7 @@ class CalculadorasScreen(Screen):
         self.add_widget(root)
 
     def on_enter(self):
-        self._nav.set_active(3)
+        self._nav.set_active(0)
         self._rebuild()
 
     def _rebuild(self):

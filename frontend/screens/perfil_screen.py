@@ -34,7 +34,7 @@ class PerfilScreen(Screen):
         self.add_widget(root)
 
     def on_enter(self):
-        self._nav.set_active(4)
+        self._nav.set_active(3)
         self._rebuild()
 
     def _card(self, layout, title, text):
