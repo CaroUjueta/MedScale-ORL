@@ -3,38 +3,53 @@ from frontend.screens.base import ScaleScreen
 OPTS = ["No (0)", "A veces (2)", "Si (4)"]
 VALS = [0, 2, 4]
 
+def _interpretar_thi(puntaje):
+    if puntaje <= 16:
+        return "Sin discapacidad\n(acufeno leve)"
+    elif puntaje <= 36:
+        return "Discapacidad leve"
+    elif puntaje <= 56:
+        return "Discapacidad moderada"
+    elif puntaje <= 76:
+        return "Discapacidad severa"
+    else:
+        return "Discapacidad catastrofica"
+
+
 QS = [
-    "1. Le impiden los zumbidos conciliar el sueño",
-    "2. Le impiden los zumbidos concentrate",
-    "3. Le impiden los zumbidos escuchar con claridad",
-    "4. Le causan los zumbidos enfado",
-    "5. Le causan los zumbidos confusion",
-    "6. Le causan los zumbidos depresion",
-    "7. Le impiden los zumbidos relajarse",
-    "8. Le causan los zumbidos ansiedad",
-    "9. Le impiden los zumbidos disfrutar de la vida social",
-    "10. Le impiden los zumbidos trabajar",
-    "11. Le impiden los zumbidos leer",
-    "12. Le impiden los zumbidos disfrutar de la musica",
-    "13. Le causan los zumbidos irritabilidad",
-    "14. Le causan los zumbidos problemas de equilibrio",
-    "15. Le impiden los zumbidos ir al cine",
-    "16. Le causan los zumbidos perder el control",
-    "17. Le impiden los zumbidos disfrutar del silencio",
-    "18. Le causan los zumbidos desesperanza",
-    "19. Le impiden los zumbidos socializar",
-    "20. Le causan los zumbidos cansancio",
-    "21. Le causan los zumbidos sentirse enfermo/a",
-    "22. Le impiden los zumbidos viajar en avion",
-    "23. Le impiden los zumbidos subir escaleras",
-    "24. Le impiden los zumbidos disfrutar aficiones",
-    "25. Le impiden los zumbidos vivir normalmente",
+    "¿Le cuesta concentrarse por culpa del ruido o zumbido de oído?",
+    "¿Le cuesta escuchar a los demás debido a que el zumbido es muy fuerte?",
+    "¿Lo pone mal genio el zumbido del oído?",
+    "¿Se siente confundido por culpa del zumbido del oído?",
+    "¿Se desespera con el ruido o zumbido del oído?",
+    "¿Se queja mucho por tener el zumbido en el oído?",
+    "¿Le cuesta quedarse dormido en la noche por culpa del zumbido del oído?",
+    "¿Cree que el problema de su zumbido es algo sin solución?",
+    "¿El zumbido del oído es un problema que le impide disfrutar de la vida como por ejemplo salir a comer con amigos o ir al cine?",
+    "¿Se siente desilusionado por culpa del zumbido del oído?",
+    "¿Cree que tiene una enfermedad incurable?",
+    "¿El zumbido de oído le impide pasarlo bien?",
+    "¿Le estorba el zumbido de oído en su trabajo o en las labores de la casa?",
+    "¿Se siente a menudo de mal genio por culpa del zumbido del oído?",
+    "¿Le cuesta comprender lo que lee por culpa del zumbido del oído?",
+    "¿Se siente alterado por el zumbido de oído?",
+    "¿Siente que el zumbido de oído ha echado a perder las relaciones con sus familiares y amigos?",
+    "¿Le cuesta sacarse de la cabeza el zumbido y concentrarse en otra cosa?",
+    "¿Siente que no puede controlar el zumbido de oído?",
+    "¿Se siente a menudo cansado por culpa del zumbido de oído?",
+    "¿Se siente deprimido por causa del zumbido de oído?",
+    "¿Lo pone nervioso el zumbido de oído?",
+    "¿Siente que no puede ya hacerle frente al zumbido de oído?",
+    "¿Empeora el zumbido de oído cuando está estresado?",
+    "¿Se siente inseguro por culpa del zumbido de oído?",
 ]
 
 
 class ThiScreen(ScaleScreen):
     title_text = "THI"
     result_prefix = "THI:"
+    scale_name = "THI"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "Responda No, A veces o Si:")
@@ -45,4 +60,9 @@ class ThiScreen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_thi(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
+        self._last_puntaje = total
+        self._save_btn_widget.opacity = 1
+        self._save_btn_widget.disabled = False

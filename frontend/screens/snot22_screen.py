@@ -4,34 +4,47 @@ OPTS = ["0", "1", "2", "3", "4", "5"]
 VALS = [0, 1, 2, 3, 4, 5]
 
 QS = [
-    "1. Necesidad de sonarse",
-    "2. Secrecion nasal",
-    "3. Goteo postnasal por la garganta",
+    "1. Necesidad de sonarse la nariz",
+    "2. Estornudos",
+    "3. Mucosidad nasal continua",
     "4. Tos",
-    "5. Sensacion de secrecion en la garganta",
-    "6. Oidos tapados",
-    "7. Mareo",
-    "8. Dolor/presion en los oidos",
-    "9. Dolor/presion facial",
-    "10. Dificultad para dormir",
-    "11. Despertar durante la noche",
-    "12. Falta de sueño reparador",
-    "13. Cansancio / falta de energia",
-    "14. Disminucion de concentracion",
-    "15. Disminucion de productividad",
-    "16. Tristeza / irritabilidad",
-    "17. Sensacion de verguenza",
-    "18. Incapacidad de hacer lo que gusta",
-    "19. Incapacidad de salir de casa",
-    "20. Incapacidad de trabajar",
-    "21. Enojo con otros por mi condicion",
-    "22. Compras por mi condicion",
+    "5. Cae secreción por atrás hacia la garganta",
+    "6. Secreción nasal espesa",
+    "7. Sensación de oído tapado",
+    "8. Mareos",
+    "9. Dolor de oídos",
+    "10. Presión o dolor en la cara",
+    "11. Dificultad para quedarse dormido(a)",
+    "12. Se despierta durante la noche",
+    "13. Sensación de que durmió mal",
+    "14. Despertar cansado(a)",
+    "15. Fatiga o cansancio",
+    "16. Productividad o rendimiento reducida",
+    "17. Menor o poca concentración",
+    "18. Frustración / cansancio / irritabilidad",
+    "19. Tristeza",
+    "20. Sentirse avergonzado(a)",
+    "21. Obstrucción nasal",
+    "22. Pérdida del sentido del olfato y gusto",
 ]
+
+
+def _interpretar_snot22(puntaje):
+    if puntaje <= 10:
+        return "Afectacion nasal minima"
+    elif puntaje <= 30:
+        return "Afectacion nasal leve"
+    elif puntaje <= 60:
+        return "Afectacion nasal moderada"
+    else:
+        return "Afectacion nasal severa"
 
 
 class Snot22Screen(ScaleScreen):
     title_text = "SNOT-22"
     result_prefix = "SNOT-22:"
+    scale_name = "SNOT-22"
+    _questions = QS
 
     def _build_form(self, layout):
         self._section(layout, "0 = nada, 5 = peor problema:")
@@ -42,4 +55,9 @@ class Snot22Screen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_snot22(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
+        self._last_puntaje = total
+        self._save_btn_widget.opacity = 1
+        self._save_btn_widget.disabled = False
