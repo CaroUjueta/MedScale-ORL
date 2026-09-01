@@ -75,6 +75,13 @@ class ScaleScreen(Screen):
         root.add_widget(self._build_body())
         self.add_widget(root)
 
+    def on_enter(self):
+        from frontend.database import registrar_uso_escala
+        from frontend.scales import escala_id_por_nombre
+
+        scale_name = getattr(self, "scale_name", self.__class__.__name__)
+        registrar_uso_escala(escala_id_por_nombre(scale_name) or scale_name)
+
     def _build_header(self):
         header = BoxLayout(
             orientation="horizontal",

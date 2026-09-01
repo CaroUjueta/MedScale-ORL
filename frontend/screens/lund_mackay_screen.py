@@ -58,6 +58,18 @@ class LundMackayScreen(ScaleScreen):
 
         layout.add_widget(self._results_pair)
 
+        self._interp_lbl = Label(
+            text="",
+            font_size=sp(14),
+            bold=True,
+            color=C_RESULT,
+            halign="center",
+            valign="middle",
+            size_hint_y=None,
+            height=dp(40),
+        )
+        layout.add_widget(self._interp_lbl)
+
     def _build_result_column(self, title):
         box = BoxLayout(
             orientation="vertical",
@@ -242,3 +254,22 @@ class LundMackayScreen(ScaleScreen):
 
         self._col_left["total"].text = f"Subtotal: {left}"
         self._col_right["total"].text = f"Subtotal: {right}"
+
+        total = left + right
+        if total <= 4:
+            interp = "Afectacion leve"
+        elif total <= 9:
+            interp = "Afectacion moderada"
+        elif total <= 14:
+            interp = "Afectacion severa"
+        else:
+            interp = "Afectacion extensa"
+
+        self._interp_lbl.text = (
+            f"Total: {total}/24\n{interp}\n(0=ninguna, 1=parcial, 2=total)"
+        )
+        self._last_puntaje = total
+
+        if hasattr(self, "_save_btn_widget"):
+            self._save_btn_widget.opacity = 1
+            self._save_btn_widget.disabled = False

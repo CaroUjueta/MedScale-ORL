@@ -44,6 +44,15 @@ QS = [
 ]
 
 
+def _interpretar_stop_bang(puntaje):
+    if puntaje <= 2:
+        return "Bajo riesgo de apnea\nobstructiva del sueno"
+    elif puntaje <= 4:
+        return "Riesgo intermedio de apnea\nobstructiva del sueno"
+    else:
+        return "Alto riesgo de apnea\nobstructiva del sueno"
+
+
 class StopBangScreen(ScaleScreen):
     title_text = "STOP-BANG"
     result_prefix = "STOP-BANG:"
@@ -61,4 +70,9 @@ class StopBangScreen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_stop_bang(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
+        self._last_puntaje = total
+        self._save_btn_widget.opacity = 1
+        self._save_btn_widget.disabled = False

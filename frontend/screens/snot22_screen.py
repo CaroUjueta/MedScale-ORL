@@ -29,6 +29,17 @@ QS = [
 ]
 
 
+def _interpretar_snot22(puntaje):
+    if puntaje <= 10:
+        return "Afectacion nasal minima"
+    elif puntaje <= 30:
+        return "Afectacion nasal leve"
+    elif puntaje <= 60:
+        return "Afectacion nasal moderada"
+    else:
+        return "Afectacion nasal severa"
+
+
 class Snot22Screen(ScaleScreen):
     title_text = "SNOT-22"
     result_prefix = "SNOT-22:"
@@ -44,4 +55,9 @@ class Snot22Screen(ScaleScreen):
         self._result_box(layout)
 
     def _calc(self, _):
-        self._show_result(sum(c._option_state["score"] for c in self._cards))
+        total = sum(c._option_state["score"] for c in self._cards)
+        interp = _interpretar_snot22(total)
+        self._result_lbl.text = f"{self.result_prefix} {total}\n{interp}"
+        self._last_puntaje = total
+        self._save_btn_widget.opacity = 1
+        self._save_btn_widget.disabled = False
